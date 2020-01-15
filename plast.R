@@ -1,92 +1,106 @@
-library(tidyverse)
-library(readxl)
-library(ggpubr)
+# last worked on 23.11.2019 #
 
-# Data is first cleaned in PFT_Lygra_Datacleaning.R. Saved as cleandata/traits.rds
+library('ggplot2')
+library('readxl')
+library('tidyverse')
+library('ggpubr')
 
 ################ CALCULATING RDPIs ##############################
 
-traits <- readRDS ('cleandata/traits.rds')
+plotID <- read_xlsx('Data/drought.plots.xlsx')
 
-all_traits <- traits  %>% 
-  filter(Year == '2018') %>% 
-  rename(Plant_height = 'plantheight',
-         Thickness = 'thickness')
+traits <- readRDS('cleandata/traits.rds', refhook = NULL) %>% 
+  left_join(plotID, by = 'plot') %>% 
+  mutate(art = paste(Genus, Species, sep = '_'),
+         phase = factor(phase, levels = c("pioneer", "building", "mature")))
 
-all_traits$art <- paste(all_traits$Genus, all_traits$Species, sep='_')
-all_traits$phase <- factor(all_traits$phase, levels = c("pioneer", "building", "mature"), labels = c("Pioneer", "Building", "Mature"))
+controls <- traits %>% 
+  select(Year, plot, art, phase, treatment, plantheight, thickness, SLA, LDMC, ID) %>% 
+  filter(treatment == '0')
 
-phase_treatment <- all_traits %>% 
-  group_by(phase, treatment, art, plot) %>% 
-  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)
 
-phase_control <- all_traits %>% 
-  group_by(phase, treatment, art, plot) %>% 
-  filter (treatment == '0') %>% 
-  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)  %>% 
-  rename (SLA_c = "SLA",
-          LDMC_c = "LDMC",
-          PH_c = "Plant_height",
-          TH_c = "Thickness",
-          control = "treatment",
-          plot_c = "plot") 
+rdpi <- controls %>% 
+  left_join(traits, by = c('phase', 'Year', 'art')) %>% 
+  filter(!(ID.x == ID.y)) %>% 
+  mutate(SLA = abs(SLA.y-SLA.x),
+         LDMC = abs(LDMC.y - LDMC.x),
+         plantheight = abs(plantheight.y - plantheight.x),
+         thickness = abs(thickness.y - thickness.x)) %>% 
+  mutate(phase = factor(phase, levels = c('pioneer', 'building', 'mature'))) %>% 
+  mutate(phase = fct_recode(phase, "Young" = 'pioneer', "Intermediate" = 'building', 'Old' = 'mature')) %>%  #treatment = as.numeric(treatment) 
+  group_by(Year,  art, phase, treatment.y) %>%  
+  summarise_at(.vars = c('plantheight', 'SLA', 'LDMC', 'thickness'), mean, na.rm = TRUE) 
 
-plot <- all_traits %>% 
-  group_by(treatment,plot, art, phase) %>% 
-  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)
 
-# Remove rows where a C plot compares with itselves
-#To compare only plot means, remove art from group_by. To compare every species, keep art.
-plast <- inner_join(plot, phase_control, by=c('phase', 'art')) %>% 
-  filter(!(plot == "1.1." & plot_c == "1.1." | 
-             plot == "2.2." & plot_c == "2.2." | 
-             plot == "3.1." & plot_c == "3.1." | 
-             plot == "4.3." & plot_c == "4.3." | 
-             plot == "5.1." & plot_c == "5.1." | 
-             plot == "6.2." & plot_c == "6.2." | 
-             plot == "7.3." & plot_c == "7.3." | 
-             plot == "8.3." & plot_c == "8.3." | 
-             plot == "9.3." & plot_c == "9.3.")) %>% 
-  group_by(treatment, plot, phase, art) %>% 
-  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness', 'SLA_c', 'LDMC_c', 'PH_c', 'TH_c'), mean, na.rm=TRUE) %>% 
-  mutate(rdpi_SLA = abs(abs(SLA_c - SLA)/SLA_c + SLA),
-         rdpi_LDMC = abs(abs(LDMC_c - LDMC)/LDMC_c + LDMC),
-         rdpi_PH = abs(abs(PH_c - Plant_height)/PH_c + Plant_height),
-         rdpi_TH = abs(abs(TH_c - Thickness)/TH_c + Thickness)) 
 
 #p <-
-ggplot(plast, aes(treatment, log(rdpi_LDMC), fill = treatment)) +
+ggplot(rdpi, aes(treatment.y, log(SLA), fill = treatment.y)) +
   geom_boxplot() +
-  scale_fill_brewer(direction = -1, name = "Drought frequency", labels = c("Ambient", "Moderate", "Extreme")) +
+  scale_fill_manual(values = c("0" = "palegreen3", "50" = "snow2", "90" = "plum3"), name = "Drought intensity", labels = c("Ambient", "Moderate", "Extreme")) +
+  #scale_fill_brewer(direction = -1, name = "Drought frequency", labels = c("Ambient", "Moderate", "Extreme")) +
+  theme_classic() +
   theme(#panel.grid.major = element_blank(), 
     #panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    plot.title = element_text( size=20, hjust = 0.5),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    legend.background = element_rect(fill = "transparent", colour = NA),
+    legend.box.background = element_rect(fill = "transparent", colour = NA),
+    legend.title=element_text(size=17), 
+    legend.text=element_text(size=15),
+    plot.title = element_text( size=40, hjust = 0.5),
     axis.title.x=element_blank(),
     axis.text.x=element_blank(),
     axis.ticks.x=element_blank(),
-    axis.title.y = element_text( size=14),
-    axis.line = element_line(linetype = "solid")
+    axis.title.y = element_text( size=18),
+    axis.line = element_line(linetype = "solid"),
+    axis.text.y = element_text(size = 18)
   ) +
-  #scale_x_discrete(labels = c("Pioneer","Building","Mature")) +
+  ylab('log Plasticity Distance LDMC (mg/g)') +
   xlab ('\nPost-fire phase') +
   labs(fill='Drought frequency') +
-  ylab('Relative plasticity index (log)\n') +
-  ggtitle('Plant height') +
-  stat_compare_means( label = "p.signif", method='t.test', ref.group = '0') +
-  facet_wrap(~phase)
+  stat_compare_means( label = "p.signif", method='t.test', ref.group = '0', size = 8) +
+  facet_grid(Year~phase) +
+  theme( strip.text.x = element_blank()) +
+  facet_wrap(~Year)
 
-tiff("PH_log.tiff", units="in", width=7, height=3, res=300)
+tiff("Figures/poster_rdpi.tiff", units="in", width=9, height=6, res=300)
 p
 dev.off() 
 
+# two problems: 
+# 1) 7885 rows removed because of non-finite values
+# 2) some crazy significance levels
+
+# Using means instead
+
+
+
+##### working line ###########
+
+group_by(phase, treatment, art, plot, Year) %>% 
+  summarise_at(.vars = c('plantheight', 'SLA', 'LDMC', 'thickness'), mean, na.rm=TRUE)
+# NA phase for four rows because observations don't have plot
+
+phase_control <- traits %>% 
+  group_by(phase, treatment, art, plot, Year) %>% 
+  filter (treatment == '0') %>% 
+  summarise_at(.vars = c('plantheight', 'SLA', 'LDMC', 'thickness'), mean, na.rm=TRUE) %>% 
+  rename (SLA_c = "SLA",
+          LDMC_c = "LDMC",
+          PH_c = "plantheight",
+          TH_c = "thickness",
+          control = "treatment",
+          plot_c = "plot") 
+
+plot <- traits %>% 
+  group_by(treatment,plot, art, phase, Year) %>% 
+  summarise_at(.vars = c('plantheight', 'SLA', 'LDMC', 'thickness'), mean, na.rm=TRUE)
 
 
 
 
 
-
- #### fra Johns paper ####
+#### fra Johns paper ####
 
 # Pr = ||(H-T) / H |
 
@@ -101,12 +115,12 @@ plast2 <- plast %>%
          LDMC = abs(abs(LDMC.y - LDMC.x)/LDMC.y),
          PH = abs(abs(Plant_height.y - Plant_height.x)/Plant_height.y),
          TH = abs(abs(Thickness.y - Thickness.x)/Thickness.y)
-          ) %>% 
+  ) %>% 
   filter (treatment.x == '50' | treatment.x == '90')
-  
+
 #### UGLY ####
 # pooling controls so plots don't compare with themselves  
-  #pioner
+#pioner
 
 # 'home' population
 con.pio.1.1. <- all_traits %>% 
@@ -242,7 +256,7 @@ Lygra <- rbind(controls, treat)
 # PLOY
 
 #p <-
-  ggplot(RDPI, aes(treatment, LDMC, fill=treatment)) +
+ggplot(RDPI, aes(treatment, LDMC, fill=treatment)) +
   geom_boxplot() +
   scale_fill_brewer(palette ='PiYG') +
   theme(panel.grid.major = element_blank(), 
@@ -250,90 +264,10 @@ Lygra <- rbind(controls, treat)
         panel.background = element_blank()
   ) +
   xlab ('Drought treatment') +
-    labs(fill='Drought treatment') +
+  labs(fill='Drought treatment') +
   ylab('Relative distance plasticity index') +
   facet_wrap(~phase)
 
 tiff("LDMC_plast_rett_kontroll.tiff", units="in", width=7, height=3, res=300)
 p
 dev.off() 
-
- #### Real RDPI
-
-install.packages("remotes")
-remotes::install_github("ameztegui/Plasticity")
-
-devtools::install_github("ameztegui/Plasticity")
-
-# Breakes on: ERROR: hard-coded installation path: please report to the package maintainer and use '--no-staged-install'
-# * removing 'C:/Users/SiriVH/Documents/R/win-library/3.6/Plasticity'
-# Error in i.p(...) : 
-# (converted from warning) installation of package ‘C:/Users/SiriVH/AppData/Local/Temp/Rtmp8QjT5S/filefb44578741e/Plasticity_0.1.2.tar.gz’ had non-zero exit status
-
-#Preøver en annen (lastet ned fra github)
-source("RDPI.R")
-
-#The function is called RDPI. It accepts 4 parameters:
-
-#Data: the Dataset (all_traits)
-#Trait: Column name of the dataset corresponding to measured trait (SLA)
-#Env : column name of the dataset corresponding to the different levels of environmental conditions (treatment)
-#Indiv : column name of the dataset corresponding to the individuals (or families or species depending of the experimental design) planted replicated over all environments (art)
-#Thus dataset should contain 3 columns: one for the values of the measured trait, one for the environmental condition, one for the individuals (or families or species depending of the experimental design) hat is planted in each environment.
-
-#The function return a two columns data frame:
-  
-#  First column is called "Indiv" and contained each replicated individual over all environments
-#Second colum is called "RDPI" and contained the RDPI values
-
-  RDPI(Data = Jack, Trait = Jack$LDMC, Env = Jack$steg, Indiv = Jack$art)
-  RDPI(Jack, Trait = LDMC, Env = steg, Indiv = art)
-  
-  RDPI(Data = Jack, Trait: LDMC, Env: steg, Indiv: art)
-  
-  RDPI(Data = Mysla, LDMC, steg, art)
-  
-  RDPI(Data = all_traits, Trait = LDMC, Env = steg, Indiv = ID)
-
-nei <- RDPI(Jack, "SLA",  "steg",  "art")
-
-colnames(Mysla)
-# trur eg må ha snittverdi per art per treatmentlevel.
-
-plasticity <- all_traits %>% 
-  group_by(art, treatment, phase) %>% 
-  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)
-
-write.csv(plasticity, file = "plasticity.csv")
-write.csv(MyData, file = "MyData.csv")
-
-Jack$steg <- paste (Jack$phase, Jack$treatment, sep = "_")
-
-Mysla = Jack[, c('LDMC', 'steg', 'art')]
-RDPI(Trait = Mysla$LDMC, Env = Mysla$steg, Indiv = Mysla$art)
-
-RDPI( Mysla, LDMC, steg, art)
-
-Jack2 <- Jack %>% 
-  select(SLA,
-         steg,
-         art)
-
-######
-
-plast_p <- plast2 %>% 
-  filter(phase == 'mature')
-
-mod <- lm(SLA~treatment.x, data=plast_p)
-summary(mod)
-anova(mod)
-
-m <- lme(SLA ~ treatment.x, random = ~1|phase/art, data = plast_p, na.action=na.omit)
-summary(m)
-anova(m)
-
-compare_means(SLA~treatment.x, data=plast_p, method = "anova")
-              
-
-#We tested whether traits differ in their response to transplantation by using linear mixed effect models where PR was modeled as a function of trait, transplant type (warming vs. cooling), and their interaction with species and site as random effects to account for multiple samples from each species and site. We used the lmer function with Satterthwaite estimations for degrees of freedom for hypothesis testing from the lmerTest R package (Kuznetsova et al., 2017).
-
