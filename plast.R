@@ -1,23 +1,95 @@
 library(tidyverse)
 library(readxl)
+library(ggpubr)
 
-setwd("C:/Users/SiriVH/Dropbox/PhD/Data/LygraTraits")
-all_traits <- read_xlsx('traits_Lygra_aug18.xlsx')
+################ CALCULATING RDPIs ##############################
+
+all_traits <- traits  %>% 
+  filter(Year == '2018') %>% 
+  rename(Plant_height = 'plantheight',
+         Thickness = 'thickness')
+
 all_traits$art <- paste(all_traits$Genus, all_traits$Species, sep='_')
-all_traits$phase <- factor(all_traits$phase, levels = c("pioneer", "building", "mature"))
+all_traits$phase <- factor(all_traits$phase, levels = c("pioneer", "building", "mature"), labels = c("Pioneer", "Building", "Mature"))
 
 phase_treatment <- all_traits %>% 
-  group_by(phase, art, treatment) %>% 
+  group_by(phase, treatment, art, plot) %>% 
   summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)
 
-phase_control <- phase_treatment %>% 
-  filter (treatment == '0')
+phase_control <- all_traits %>% 
+  group_by(phase, treatment, art, plot) %>% 
+  filter (treatment == '0') %>% 
+  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)  %>% 
+  rename (SLA_c = "SLA",
+          LDMC_c = "LDMC",
+          PH_c = "Plant_height",
+          TH_c = "Thickness",
+          control = "treatment",
+          plot_c = "plot") 
 
 plot <- all_traits %>% 
-  group_by(plot, art, treatment, phase) %>% 
+  group_by(treatment,plot, art, phase) %>% 
   summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness'), mean, na.rm=TRUE)
 
-plast <- inner_join(plot, phase_control, by=c('phase', 'art'))
+# Remove rows where a C plot compares with itselves
+#To compare only plot means, remove art from group_by. To compare every species, keep art.
+plast <- inner_join(plot, phase_control, by=c('phase', 'art')) %>% 
+  filter(!(plot == "1.1." & plot_c == "1.1." | 
+             plot == "2.2." & plot_c == "2.2." | 
+             plot == "3.1." & plot_c == "3.1." | 
+             plot == "4.3." & plot_c == "4.3." | 
+             plot == "5.1." & plot_c == "5.1." | 
+             plot == "6.2." & plot_c == "6.2." | 
+             plot == "7.3." & plot_c == "7.3." | 
+             plot == "8.3." & plot_c == "8.3." | 
+             plot == "9.3." & plot_c == "9.3.")) %>% 
+  group_by(treatment, plot, phase, art) %>% 
+  summarise_at(.vars = c('Plant_height', 'SLA', 'LDMC', 'Thickness', 'SLA_c', 'LDMC_c', 'PH_c', 'TH_c'), mean, na.rm=TRUE) %>% 
+  mutate(rdpi_SLA = abs(abs(SLA_c - SLA)/SLA_c + SLA),
+         rdpi_LDMC = abs(abs(LDMC_c - LDMC)/LDMC_c + LDMC),
+         rdpi_PH = abs(abs(PH_c - Plant_height)/PH_c + Plant_height),
+         rdpi_TH = abs(abs(TH_c - Thickness)/TH_c + Thickness)) 
+
+#p <-
+ggplot(plast, aes(treatment, log(rdpi_LDMC), fill = treatment)) +
+  geom_boxplot() +
+  scale_fill_brewer(direction = -1, name = "Drought frequency", labels = c("Ambient", "Moderate", "Extreme")) +
+  theme(#panel.grid.major = element_blank(), 
+    #panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    plot.title = element_text( size=20, hjust = 0.5),
+    axis.title.x=element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.title.y = element_text( size=14),
+    axis.line = element_line(linetype = "solid")
+  ) +
+  #scale_x_discrete(labels = c("Pioneer","Building","Mature")) +
+  xlab ('\nPost-fire phase') +
+  labs(fill='Drought frequency') +
+  ylab('Relative plasticity index (log)\n') +
+  ggtitle('Plant height') +
+  stat_compare_means( label = "p.signif", method='t.test', ref.group = '0') +
+  facet_wrap(~phase)
+
+tiff("PH_log.tiff", units="in", width=7, height=3, res=300)
+p
+dev.off() 
+
+
+
+
+
+
+
+ #### fra Johns paper ####
+
+# Pr = ||(H-T) / H |
+
+
+
+
+
 
 
 plast2 <- plast %>% 
@@ -165,7 +237,7 @@ Lygra <- rbind(controls, treat)
 
 # PLOY
 
-p <-
+#p <-
   ggplot(RDPI, aes(treatment, LDMC, fill=treatment)) +
   geom_boxplot() +
   scale_fill_brewer(palette ='PiYG') +
