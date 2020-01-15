@@ -2,7 +2,11 @@ library(tidyverse)
 library(readxl)
 library(ggpubr)
 
+# Data is first cleaned in PFT_Lygra_Datacleaning.R. Saved as cleandata/traits.rds
+
 ################ CALCULATING RDPIs ##############################
+
+traits <- readRDS ('cleandata/traits.rds')
 
 all_traits <- traits  %>% 
   filter(Year == '2018') %>% 
