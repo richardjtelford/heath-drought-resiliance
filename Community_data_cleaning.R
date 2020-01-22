@@ -92,10 +92,22 @@ community <- community.import %>%
                                        ifelse(site == 'NOV' & (plot == '20.9.' &  species == 'Rhytidiadelphus_loreus' & year == '2018'), 'Rhytidiadelphus_squarrosus',
                                        species )))))))))))))))))))))))))))))))))))))))) %>% 
   mutate ( species = new.species)  
+
+
+# turn plots around
+ #first, make a matrix
+
+subplot <- c(1:16)
+turn.left <- c(13,9,5,1,14,10,6,2,15,11,7,3,16,12,8,4)
+turn.right <- c(4,8,12,16,3,7,11,15,2,6,10,14,1,5,9,13)
+flip <- c(16:1)
+
+rotate <- data.frame(subplot, turn.left, turn.right, flip)
+
+view(rotate)
+ 
   
-  
-  ifelse(species == 'Racomitrium_canescens'), 'Racomitrium_lanuginosum', 
-  
+ 
 saveRDS(community, 'cleandata/community.rds')
 
 write.csv(community, "cleandata/ide2.csv")
