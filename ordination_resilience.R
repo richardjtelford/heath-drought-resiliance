@@ -13,18 +13,26 @@ library(tidyr)
 library(dplyr)
 library(readr)
 
+
+
 # Need rutedata sheet 'frequency' for species abundances. Call it 'veg'
 # Need rutedata sheet 'names' for taxa. Call it 'taxa'
 # fOR LATER: Need drought.plots for metadata on plots. Call it 'PlotID' #environment variables
 
-veg <- readRDS('cleandata/community.rds') #community data cleaned
-PlotID <- read_xlsx('Data/drought.plots.xlsx')
-#taxa <- read_xlsx('Data/DE.1_Community.xlsx', sheet = 'names') # just so we easily can filter out lichens and bryophytes
+#community data cleaned
+veg <- readRDS('cleandata/community.rds') 
 
+#metadata about plots
+PlotID <- read_xlsx('Data/drought.plots.xlsx') 
+
+# just so we easily can filter out lichens and bryophytes:
+#taxa <- read_xlsx('Data/DE.1_Community.xlsx', sheet = 'names') 
+
+# this gives a matrix with year, plot, and site and then species as columns with cover in rows  
 prep <- veg %>%
-  filter (experiment == 'Resilience' | experiment == 'resilience') %>%                             
+  filter (experiment == 'Resilience' | experiment == 'resilience') %>%          
   replace (. == '.+' | . == 'plas', 1) %>%  # Replace <1 abundances with 1
-  filter ( cover > 5) %>%  
+  filter ( cover > 5) %>% # this can be adjusted 
   #rename (Latin_name = species) %>%                    
   #left_join (taxa, by='Latin_name') %>% 
   #filter (!(Group=='bryophyte' | Group=='lichen')) %>% 
@@ -37,9 +45,12 @@ prep <- veg %>%
   replace (is.na(.), 0) %>% 
   ungroup()
 
+
+# extract only species-cover matrix
 com <- metaMDS(prep %>%
                  select (-year, -plot, -site))
 
+# extract metadata (year, plot, site). Add treatment  from plotID df
 env <- prep %>% 
   select (year, plot, site) %>% 
   left_join (PlotID, by='plot')
@@ -49,23 +60,28 @@ env <- prep %>%
 #   left_join (PlotID, by='plot') %>% 
 #   mutate(phase = fct_recode(phase, "Young" = 'pioneer', "Intermediate" = 'building', 'Old' = 'mature'))
 
-data.scores <- as.data.frame(scores(com)) %>%   #Using the scores function from vegan to extract the site scores and convert to a data.frame
+#Using the scores function from vegan to extract the site scores and convert to a data.frame
+data.scores <- as.data.frame(scores(com)) %>%  
   mutate(plot = prep$plot,
          year = as.character(prep$year),
-         site = prep$site)%>% 
+         site = prep$site) %>% 
   left_join(env, by=c('plot', 'year')) %>% 
   filter (!( site == 'TOR'))
 
 #data.scores$phase<-factor(data.scores$phase, levels=c("Young", "Intermediate", "Old"))
 #levels(data.scores$phase) <- c("Young", "Intermediate", "Old") 
 
-species.scores <- as.data.frame(scores(com, "species")) %>% #Using the scores function from vegan to extract the species scores and convert to a data.frame
+
+#Using the scores function from vegan to extract the species scores and convert to a data.frame
+species.scores <- as.data.frame(scores(com, "species")) %>% 
   mutate(species = rownames(.))
 
- reddata <- data.scores %>% 
+# make a data frame with the controls to make it possible to plot as a independent layer
+reddata <- data.scores %>% 
    filter(treatment == 'C')
 
 
+# NMDS plot in ggplot
 #p <-
 ggplot(data=data.scores %>% filter (treatment == 'B'), aes(x=NMDS1,y=NMDS2, shape= year, colour= site ), alpha=0.8 ) + 
   geom_point(data= reddata, size=3,  alpha = 0.3) + 
@@ -101,49 +117,57 @@ dev.off()
 #### PRC ####
 
 
-# get information about burnt and control plots
+# get information about burnt and control plots. Not necessary if the above is run
+#PlotID <- read_xlsx('Data/drought.plots.xlsx') 
 
-treatment <- read_xlsx('Data/drought.plots.xlsx') 
+# just so we easily can filter out lichens and bryophytes:
+taxa <- read_xlsx('Data/DE.1_Community.xlsx', sheet = 'names') 
+
 
 # get community and make a species matrix
-
-all <- readRDS('cleandata/community.rds') %>%  #community data cleaned 
+all <- readRDS('cleandata/community.rds')  %>%
+  mutate(Latin_name = species) %>% 
+  left_join(taxa, by = 'Latin_name')%>%  #community data cleaned 
   filter (experiment == 'Resilience' | experiment == 'resilience',
-          !(plot == '11.' | plot == '12.' | plot == '13.' | plot == '14.' | plot == '15.' | plot == '24.0.' | plot == '24.4.' | plot == '24.5.' | plot == '24.6.' | plot == '24.9.' | plot == '24.10.' | plot == '24.11.' | plot == '24.12.')) %>% 
+          !(plot %in% c('11.', '12.',  '13.',  '14.', '15.', '24.0.' ,'24.4.', '24.5.', '24.6.','24.9.', '24.10.', '24.11.', '24.12.')),
+          !(Group == 'lichen' | Group == 'bryophyte')) %>% # remove extra plots that was not used
   replace (. == '.+' | . == 'plas', 1) %>% # Replace <1 abundances with 1
   #filter ( cover > 5) %>%  
   #filter(!(species == 'Cladonia_sp')) %>% 
   #select (species, cover) %>% 
   spread(species, cover) %>% 
-  left_join(treatment, by = c('site','plot')) %>% 
+  left_join(PlotID, by = c('site','plot')) %>% 
   ungroup() %>% 
   mutate(prc_treat = as.factor(ifelse(treatment == 'C', 'C', site)))
 
-
 # extract time
-
 year = as.factor(all$year)
 
 
 #extract treatment
-
 fire = as.factor(all$prc_treat) %>% 
   relevel(ref = 'C')
 
 
-#extract communuity
-
+#extract community 
 plants <- all %>% 
-  select(31:162) %>% 
+  select(8:106) %>% #ugly numbers
   replace (is.na(.), 0) 
 
-# make model 
 
-mod <- prc(response = plants,  treatment = fire, time = year, na.action = na.omit) 
+# make rda model 
+mod_rda <- rda(plants ~ fire*year + Condition(year), na.action = na.omit) 
+
+mod_prc <- prc(response = plants,  treatment = fire, time = year, na.action = na.omit) 
+
+# PRC plot
+ 
+plot(mod_rda)
+plot(mod_prc)
 
 
 # get species scores and plot values
-summary(mod)
+summary(mod_prc)
 
 # # usefull stuff for later
 # logabu <- colSums(plants)
@@ -153,14 +177,29 @@ summary(mod)
 # extract values which is what I will plot, and species scores which I will try to add on later
 
 # species scores
-test <- summary(mod)
+test <- summary(mod_prc)
 sp <- as.data.frame(test$sp)
 
-# plot values
-# values <- as.data.frame(test$coefficients) %>% 
-#   gather(key = year, value = score) %>% 
-#   mutate(site = rep(c('BER', 'YST', 'NOV', 'ROS', 'SKO', 'TOR', 'YST'), times = 4))
+# rank species scores
+sp_all <- sp 
 
+
+# plot values
+ values <- as.data.frame(test$coefficients) %>% 
+   gather(key = year, value = score) %>% 
+   mutate(site = rep(c('BER', 'YST', 'NOV', 'ROS', 'SKO', 'TOR', 'YST'), times = 4))
+
+ 
+ ggplot(values_all_p, aes(year, score, colour = plot)) +
+   geom_point(size = 2) +
+   geom_path(data = values_all_p, aes(x = year, y = score, group = plot), size = 1) +
+   theme_classic() +
+   scale_x_discrete (labels = c("Unburnt", "1", "2", "3"))  +
+   geom_abline(intercept = 0, slope = 0) +
+   ylab('PRC axis 1') +
+   xlab('Years since fire') +
+   facet_wrap(~site) 
+ 
 ### SEE BELOW PLOT
   # first, for site means, below there again for single plots
 
@@ -168,6 +207,7 @@ sp <- as.data.frame(test$sp)
 
 
 # plot
+#need to go further down before running the plot
 
 ggplot(values_all_p, aes(year, score, colour = plot)) +
   geom_point(size = 2) +
@@ -525,6 +565,9 @@ values_SKO <- as.data.frame(test_SKO$coefficients) %>%
 
 
 values_all <- rbind (values_GOL, values_NOV, values_YST, values_ROS, values_BER, values_TOR, values_SKO) 
+
+# bind_rows instead of rbind, then you can drop mutate for site names, and use bind_roms(SKO = values_SKO (...), .id = 'site')
+## you van make an object a prs object by: object <- "prc"
 
 values_all$site <- factor(values_all$site, levels =  c('GOL', 'NOV', 'YST', 'ROS', 'BER', 'TOR', 'SKO'))
 
@@ -895,3 +938,35 @@ values_SKO_p <- as.data.frame(test_SKO_p$coefficients) %>%
 values_all_p <- rbind (values_GOL_p, values_NOV_p, values_YST_p, values_ROS_p, values_BER_p, values_TOR_p, values_SKO_p) 
 
 values_all_p$site <- factor(values_all_p$site, levels =  c('GOL', 'NOV', 'YST', 'ROS', 'BER', 'TOR', 'SKO'))
+
+
+
+
+#### LGV PhD #####
+
+LGV <- read_xlsx('Data/LGV_Kontroll_Nerlands?y_2007.xlsx') %>% 
+  replace (is.na(.), 0)
+
+LGV_site <- LGV %>% 
+  select(Site)
+
+LGV_plants <- LGV %>% 
+  select(!(Site)) %>% 
+           select(!(Block)) %>% 
+                    select(!(Plot)) 
+        
+LGV_plot <- LGV %>% 
+  select(Plot) %>% 
+  mutate(Plot = as.factor(Plot))
+
+LGV_block <- LGV %>% 
+  select(Block) %>% 
+  mutate(Block = as.character(Block))
+
+
+LGV_rda <- rda(LGV [,-1:3] ~ LGV_block*LGV_plot)
+
+plot(LGV_rda)
+    
+
+
