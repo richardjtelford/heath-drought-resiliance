@@ -6,10 +6,6 @@ library(xlsx)
 
 # Import data
 
-community.import <- read_xlsx('Data/ide.xlsx', col_types = 'text', na = 'NA') %>% 
-  mutate(cover = recode(cover, '.+' = '1'),
-         cover = as.numeric(cover)) #community.import %>% count(cover)
-
 community.import <- read_xlsx('Data/DE.1_Community.xlsx', sheet = 'frequency', col_types = 'text', na = 'NA') %>% 
   mutate(cover = recode(cover, '.+' = '1'),
          cover = as.numeric(cover)) #community.import %>% count(cover)
@@ -35,7 +31,24 @@ community <- community.import %>%
                                       '12.1.' = '12.2.',
                                       '12.2.' = '11.3.',
                                       '12.3.' = '12.3.'
-                        ), false = plot),
+                        ), false = plot)) %>% 
+  mutate(plot = if_else(site == 'ROS' & year == '2018', #ROS had wrong plot numbers in 2018. Fix that
+                       true = recode(plot,   
+                                     '22.1.' = '22.3.',
+                                     '22.3.' = '22.1.',
+                                     '22.4.' = '22.6.',
+                                     '22.5.' = '22.4.',
+                                     '22.6.' = '22.7.',
+                                     '22.7.' = '22.5.',
+                                     '22.9.' = '22.10.',
+                                     '22.10.' = '22.9.'
+                       ), false = plot),
+         plot = ifelse(site == 'ROS' & plot == '22.10', '22.0.', plot),
+         plot = ifelse(site == 'SKO' & plot == '25.10', '25.0.', plot),
+         plot = ifelse(site == 'TOR' & year == '2018' & plot == '14', '24.14.', plot),
+         plot = ifelse(site == 'TOR' & year == '2018' & plot == '16', '24.16.', plot),
+         plot = ifelse(site == 'ROS' & year == '2017' & plot == '22.9.', '22.0.', plot),
+         plot = ifelse(site == 'ROS' & year == '2017' & plot == '22.0', '22.9.', plot),
          plot = str_replace(plot, pattern = "$" , replacement =  "."),       # This fix the plot number issue on TOR 
          plot = str_replace(plot, pattern = "\\.\\.", replacement = ".")) %>% 
   mutate(plot = if_else(site == 'SKO' & !year == '2017' , #SKO were misplaced with one in three years
@@ -51,7 +64,7 @@ community <- community.import %>%
                                       '25.10.' = '25.9.',
                                       '25.0.' = '25.9.',
                                       '25.1.' = '25.0.'  
-                                      ),  false = plot)) %>% 
+                                      ),  false = plot)) %>%  # fixing species (should change to case when)
   mutate(new.species = coalesce(ifelse(site == 'BUO' & (species == 'Agrostis_canina' | species == 'Agrostis_capillaris' | species == 'Agrostis_sp'), 'Agrostis_capillaris', 
                                        ifelse(site == 'NOV' & species == 'Agrostis_canina', 'Agrostis_vinealis', 
                                        ifelse(site == 'GOL' & species == 'Lycopodium_annitonum', 'Lycopodum_clavatum', 
@@ -91,26 +104,65 @@ community <- community.import %>%
                                        ifelse(site == 'NOV' & (plot == '20.9.' &  species == 'Carex_sp' & (year == '2016' | year == '2018')), 'Carex_pilulifera',
                                        ifelse(site == 'NOV' & (plot == '20.9.' &  species == 'Rhytidiadelphus_loreus' & year == '2018'), 'Rhytidiadelphus_squarrosus',
                                        species )))))))))))))))))))))))))))))))))))))))) %>% 
-  mutate ( species = new.species)  
+  mutate ( species = new.species)  %>% 
+  group_by(site, plot, year, species, group, experiment) %>% 
+  summarise_at(.vars = "cover", sum, NA.rm = TRUE) 
 
 
-# turn plots around
- #first, make a matrix
-
-subplot <- c(1:16)
-turn.left <- c(13,9,5,1,14,10,6,2,15,11,7,3,16,12,8,4)
-turn.right <- c(4,8,12,16,3,7,11,15,2,6,10,14,1,5,9,13)
-flip <- c(16:1)
-
-rotate <- data.frame(subplot, turn.left, turn.right, flip)
-
-view(rotate)
- 
-  
- 
 saveRDS(community, 'cleandata/community.rds')
 
-write.csv(community, "cleandata/ide2.csv")
 
 
+##############################
+# 
+# 
+# 
+# community <- community.import %>% 
+#   left_join(names, by= 'species') %>% 
+#   mutate(species = coalesce(correct_name, species)) %>%  #jumps to second if first in NA, keep first if it is not NA
+#   select(-correct_name) %>% 
+#   mutate(plot = if_else(site == 'BUO' & year == '2016', #BUO had wrong plot numbers in 2016. Fix that
+#                         true = recode(plot,   
+#                                       '10.1.' = '11.1.',
+#                                       '10.2.' = '10.1.',
+#                                       '10.3.' = '12.1.',
+#                                       '11.1.' = '10.3.',
+#                                       '11.2.' = '10.2.',
+#                                       '11.3.' = '11.2.',
+#                                       '12.1.' = '12.2.',
+#                                       '12.2.' = '11.3.',
+#                                       '12.3.' = '12.3.'
+#                         ), false = plot),
+#          plot = str_replace(plot, pattern = "$" , replacement =  "."),       # This fix the plot number issue on TOR 
+#          plot = str_replace(plot, pattern = "\\.\\.", replacement = ".")) %>% 
+#   mutate(plot = if_else(site == 'SKO' & !year == '2017' , #SKO were misplaced with one in three years
+#                         true = recode(plot,   
+#                                       '25.2.' = '25.1.',
+#                                       '25.3.' = '25.2.',
+#                                       '25.4.' = '25.3.',
+#                                       '25.5.' = '25.4.',
+#                                       '25.6.' = '25.5.',
+#                                       '25.7.' = '25.6.',
+#                                       '25.8.' = '25.7.',
+#                                       '25.9.' = '25.8.',
+#                                       '25.10.' = '25.9.',
+#                                       '25.0.' = '25.9.',
+#                                       '25.1.' = '25.0.'  
+#                         ),  false = plot)) %>% 
+#   mutate(
+#     new.species = case_when(site == 'BUO' & (species == 'Agrostis_canina' | species == 'Agrostis_capillaris' | species == 'Agrostis_sp') ~ 'Agrostis_capillaris',
+#                             site == 'NOV' & species == 'Agrostis_canina', 'Agrostis_vinealis',
+#                             TRUE ~ species))
+#          
+# 
+#   mutate(new.species = coalesce(ifelse(site == 'BUO' & (species == 'Agrostis_canina' | species == 'Agrostis_capillaris' | species == 'Agrostis_sp'), 'Agrostis_capillaris', 
+#                                        ifelse(site == 'NOV' & species == 'Agrostis_canina', 'Agrostis_vinealis', 
+#                                               ifelse(site == 'GOL' & species == 'Lycopodium_annitonum', 'Lycopodum_clavatum', 
+#                                                      ifelse(site == 'GOL' & (species == 'Polygala_vulgaris' | species == 'Polygala_sp'), 'Polygala_serpyllifolia', 
+#                                                             ifelse(site == 'GOL' & species == 'Diphasiastrum_sp', 'Diphasiastrum_alpinum', 
+#                                                                    ifelse((site == 'NOV' & species == 'Viola_sp') | (site == 'BUO' & (species == 'Viola_canina1' | species == 'Viola_sp' | species == 'Viola_riviniana')), 'Viola_canina',
+#                                                                           ifelse(site == 'TOR' & species == 'Carex_binervis', 'Carex_vaginata',                                                                                     species ))))))))) %>% 
+#   mutate ( species = new.species)
+# 
+# 
 
