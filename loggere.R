@@ -281,44 +281,44 @@ monthly <- full.df %>%
 
 
 #ggplot (full.df %>%                                     #Careful, this plot so many layers that everything will break down. should define seasons in main df and tidy up
-          filter( sensor == 'soil.moist.15'), 
-        aes (date, reading)) +
-  geom_rect(aes(xmin = as.Date("2017-06-01"),
-                xmax = as.Date("2017-08-31"),
-                ymin = -Inf, ymax = Inf, fill = 'summer'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2017-09-01"),
-  #               xmax = as.Date("2017-11-30"),
-  #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2017-12-01"),
-  #               xmax = as.Date("2018-02-28"),
-  #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2018-03-01"),
-  #               xmax = as.Date("2018-05-31"),
-  #               ymin = -Inf, ymax = Inf, fill = 'spring'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2018-06-01"),
-  #               xmax = as.Date("2018-08-31"),
+  #         filter( sensor == 'soil.moist.15'), 
+  #       aes (date, reading)) +
+  # geom_rect(aes(xmin = as.Date("2017-06-01"),
+  #               xmax = as.Date("2017-08-31"),
   #               ymin = -Inf, ymax = Inf, fill = 'summer'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2018-09-01"),
-  #               xmax = as.Date("2018-11-30"),
-  #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2018-12-01"),
-  #               xmax = as.Date("2019-02-28"),
-  #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2019-03-01"),
-  #               xmax = as.Date("2019-05-31"),
-  #               ymin = -Inf, ymax = Inf, fill = 'spring'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2019-06-01"),
-  #               xmax = as.Date("2019-08-31"),
-  #               ymin = -Inf, ymax = Inf, fill = 'summer'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2019-09-01"),
-  #               xmax = as.Date("2019-11-30"),
-  #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
-  # geom_rect(aes(xmin = as.Date("2019-12-01"),
-  #               xmax = as.Date("2020-02-29"),
-  #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
-  geom_smooth(aes(color=interaction(geography, phase), linetype=treatment), se=FALSE)  +
-  theme_classic() +
-  scale_fill_manual(values = c("summer" = "lightyellow", "fall" = "mistyrose", "winter" = "lightcyan", "spring" = "darkseagreen1"), name = "Season", labels = c("Summer", "Autumn", "Winter", "Spring"))
+  # # geom_rect(aes(xmin = as.Date("2017-09-01"),
+  # #               xmax = as.Date("2017-11-30"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2017-12-01"),
+  # #               xmax = as.Date("2018-02-28"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2018-03-01"),
+  # #               xmax = as.Date("2018-05-31"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'spring'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2018-06-01"),
+  # #               xmax = as.Date("2018-08-31"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'summer'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2018-09-01"),
+  # #               xmax = as.Date("2018-11-30"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2018-12-01"),
+  # #               xmax = as.Date("2019-02-28"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2019-03-01"),
+  # #               xmax = as.Date("2019-05-31"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'spring'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2019-06-01"),
+  # #               xmax = as.Date("2019-08-31"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'summer'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2019-09-01"),
+  # #               xmax = as.Date("2019-11-30"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'fall'), alpha = .2) +
+  # # geom_rect(aes(xmin = as.Date("2019-12-01"),
+  # #               xmax = as.Date("2020-02-29"),
+  # #               ymin = -Inf, ymax = Inf, fill = 'winter'), alpha = .2) +
+  # geom_smooth(aes(color=interaction(geography, phase), linetype=treatment), se=FALSE)  +
+  # theme_classic() +
+  # scale_fill_manual(values = c("summer" = "lightyellow", "fall" = "mistyrose", "winter" = "lightcyan", "spring" = "darkseagreen1"), name = "Season", labels = c("Summer", "Autumn", "Winter", "Spring"))
 
 
 

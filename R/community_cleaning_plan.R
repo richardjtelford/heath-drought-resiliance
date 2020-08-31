@@ -1,8 +1,4 @@
-#### CLEANING COMMUNITY DATA ####
 
-library(readxl)
-library(tidyverse)
-library(xlsx)
 
 # Import data
 
