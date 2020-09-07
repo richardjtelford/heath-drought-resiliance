@@ -1,6 +1,14 @@
 #load packages
 library("drake")
 
+## DO THIS FIRST
+# Generate an osf personal access token at
+# https://osf.io/settings/tokens/create
+# Run
+# usethis::edit_r_environ()
+# and add the line 
+# OSF_PAT=my_70_character_token
+
 #plan
 resilience_plan <- "R/1_main_resilience_drake_plan.R"
 
