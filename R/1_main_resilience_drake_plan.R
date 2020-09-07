@@ -15,9 +15,10 @@ library("patchwork")
 #drake configuration
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
 
-#source subplans
+#source sub-plans
 source("R/download_plan.R")
 source("R/data_import_plan.R")
+source("R/community_cleaning_plan.R")
 
 #source extra function
 
@@ -31,7 +32,7 @@ analysis_plan <- drake_plan(
 manuscript_plan <- drake_plan(
   #add extra packages to bibliography
   biblio2 = package_citations(
-    packages = c("e1071", "traitstrap", "drake", "tidyverse", "rmarkdown", "renv"), 
+    packages = c("vegan", "drake", "tidyverse", "rmarkdown", "renv"), 
     old_bib = file_in("Rmd/TDT.bib"), 
     new_bib = file_out("Rmd/TDT2.bib")),
   
@@ -47,7 +48,8 @@ manuscript_plan <- drake_plan(
 
 #### combine plans ####
 trait_plan <- bind_plans(download_plan, 
-                        import_plan, 
+                        import_plan,
+                        clean_community_plan,
                         manuscript_plan)
 #quick plot
 plot(trait_plan)
