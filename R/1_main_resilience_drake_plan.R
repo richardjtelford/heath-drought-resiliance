@@ -11,6 +11,8 @@ library("nlme")
 library("vegan")
 library("ggvegan")
 library("patchwork")
+library("mapdata")
+library("ggrepel")
 
 #drake configuration
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
@@ -19,6 +21,7 @@ pkgconfig::set_config("drake::strings_in_dots" = "literals")
 source("R/download_plan.R")
 source("R/data_import_plan.R")
 source("R/community_cleaning_plan.R")
+source("R/figures_plan.R")
 
 #source extra function
 
@@ -50,6 +53,7 @@ manuscript_plan <- drake_plan(
 trait_plan <- bind_plans(download_plan, 
                         import_plan,
                         clean_community_plan,
+                        figures_plan,
                         manuscript_plan)
 #quick plot
 plot(trait_plan)
