@@ -7,6 +7,11 @@ clean_community_plan = drake_plan(
 # Cleaning species names (when species list are clean, check it with a proper taxonomy list)
   
 comm = comm0 %>% 
+  mutate(species = case_when(
+    species == "cladonia_sp" ~ "Cladonia_sp",
+    species == "llex_aquifolium" ~ "Ilex_aquifolium",
+    TRUE ~ species
+  )) %>% 
   left_join(spp_names, by= 'species') %>% 
   mutate(species = coalesce(correct_name, species)) %>%  #jumps to second if first in NA, keep first if it is not NA
   select(-correct_name) %>% 

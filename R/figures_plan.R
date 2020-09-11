@@ -11,36 +11,34 @@ figures_plan <- drake_plan(
   },
   
   
-  # calluna cover
+  # Calluna cover
   calluna_cover_plot = calluna_cover %>% 
     select(-ends_with("org")) %>% 
+    left_join(site_data, by = c("lokalitet" = "Site") ) %>% 
     pivot_longer(ends_with("korr")) %>% 
     mutate(
       name = factor(name, 
                     levels = c("dead_korr", "damaged_korr", "vital_korr"), 
                     labels = c("Dead", "Damaged", "Live")), 
       value = as.numeric(value)) %>% 
-    ggplot(aes(x = factor(year), y = value, fill = treatment, colour = treatment)) + 
-   # geom_boxplot() + 
-    stat_summary() + 
-    labs(x = "Year", y = "Cover %", fill = "Treatment") +
-    scale_fill_discrete(limits = c("B", "C"), labels = c("Burnt", "Control")) +
-    facet_grid(name ~ lokalitet),
-  
-  calluna_cover_plot2 = calluna_cover %>% 
-    select(-ends_with("org")) %>% 
-    pivot_longer(ends_with("korr")) %>% 
-    mutate(
-      name = factor(name, 
-                    levels = c("dead_korr", "damaged_korr", "vital_korr"), 
-                    labels = c("Dead", "Damaged", "Live")), 
-      value = as.numeric(value)) %>% 
-    group_by(lokalitet, year, name, treatment) %>% 
-    summarise(value = mean(value, na.rm = TRUE)) %>% 
+    group_by(code, year, name, treatment) %>% 
+    summarise(value = mean(value, na.rm = TRUE)) %>%
+    mutate(treatment = factor(treatment, levels = c("C", "B"))) %>% 
     ggplot(aes(x = factor(year), y = value, fill = name)) + 
     geom_col() + 
+    scale_fill_brewer(palette = "Set1") + 
     labs(x = "Year", y = "Cover %", fill = "Treatment") +
-    facet_grid(lokalitet ~ treatment, labeller = labeller(treatment = c(B = "Burnt", C = "Control")))
+    facet_grid(code ~ treatment, labeller = labeller(treatment = c(B = "Burnt", C = "Control"))) +
+    theme(strip.text.y = element_text(angle = 0)),
   
-  
+  community_group_cover = comm %>% 
+    left_join(meta0, by = c("site", "plot")) %>% 
+    left_join(site_data, by = c("site" = "Site")) %>% 
+    group_by(code, treatment, year, group) %>% 
+    summarise(cover = mean(cover)) %>%
+    ggplot(aes(x = year, y = cover, fill = group)) +
+    geom_col() + 
+    scale_fill_brewer(palette = "Dark2") +
+    facet_grid(code ~ treatment) +
+    theme(strip.text.y = element_text(angle = 0))
 )

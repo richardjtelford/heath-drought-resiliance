@@ -57,7 +57,7 @@ NOV	Novelandet	2673			O2	61.807887	4.922439
 ROS	Rossvolløya	1136			O2	63.304347	8.007803
 SKO	Skotsvær	1309			O1	65.79602	12.219299
 TOR	Torsøya	1131			O2	65.68843	12.067688
-YTS	Ytstevika	2560			O2	62.359774	5.519645", delim = "\t") %>% 
+YST	Ytstevika	2560			O2	62.359774	5.519645", delim = "\t") %>% 
     arrange(desc(Latitude)) %>% 
     mutate(code = letters[1:nrow(.)])
 )
