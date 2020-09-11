@@ -9,7 +9,10 @@ csl: Rmd/elsevier-harvard_rjt.csl
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+
+#set default theme
+theme_set(theme_bw())
 ```
 
 ## Methods
@@ -26,17 +29,20 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 
 ## Results
 
-```{r}
+```{r nmds-plot, fig.cap = "NMDS"}
 readd(nmds_plot)
 ```
 
-```{r}
+```{r calluna-cover-plot, fig.cap = "Changes of _Calluna_ cover over time by health status. Sites are arranged from north-south."}
 readd(calluna_cover_plot)
 ```
 
-```{r}
+```{r community-group-plot, fig.cap = "Changes of community cover over time by taxonomic group. Sites are arranged from north-south."}
 readd(community_group_cover)
 ```
 
+```{r species_ordination_plot, fig.cap = "Too many species"}
+readd(nmds_species_plot)
+```
 
 ## References

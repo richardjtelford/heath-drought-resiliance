@@ -23,6 +23,21 @@ ordination_plan = drake_plan(
     geom_point(aes(size = year == min(year))) + 
     geom_path(aes(group = plot)) +
     scale_size_discrete(range = c(1, 2)) +
-    labs(colour = "Site", size = "First year", linetype = "Treatment", shape = "Treatment")
+    labs(colour = "Site", size = "First year", linetype = "Treatment", shape = "Treatment"),
   
+  # species in nmds plot
+  
+  spp_summ = comm %>% 
+    group_by(species) %>% 
+    filter(cover > 0) %>% 
+    summarise(mx = max(cover), n = n()) %>% 
+    filter(mx > 10, n > 10) %>% 
+    mutate(name_species = species),
+    
+  nmds_species_plot = fortify(comm_nmds) %>% 
+    filter(Score == "species") %>% 
+    left_join(spp_summ, by = c("Label" = "species")) %>% 
+    ggplot(aes(x = NMDS1, y = NMDS2, label = name_species)) +
+    geom_point(shape = "+", colour = "red", size = 1) +
+    geom_text_repel()
 )
