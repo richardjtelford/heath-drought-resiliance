@@ -17,14 +17,26 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Software
 
 All analyses were done in R v. `r getRversion()` [@R] and used
-traitstrap v. `r packageVersion("traitstrap")` [@traitstrap] to impute traits,
-e1071 v. `r packageVersion("e1071")` [@e1071] to calculate moments,
-and tidyverse v. `r packageVersion("tidyverse")` [@tidyverse].
+vegan v. `r packageVersion("vegan")` [@vegan] for ordination,
+and tidyverse v. `r packageVersion("tidyverse")` [@tidyverse] for data manipulation.
 Packages drake v. `r packageVersion("drake")` [@drake], 
 rmarkdown `r packageVersion("rmarkdown")` [@rmarkdown1] and
 renv v. `r packageVersion("renv")` [@renv] were used to ensure reproducibility.
-Code to reproduce all the analyses is archived at [https://github.com/richardjtelford/trait-driver-analysis](https://github.com/richardjtelford/trait-driver-analysis).
+Code to reproduce all the analyses is archived at [https://github.com/richardjtelford/Lygra_traits/tree/Drake](https://github.com/richardjtelford/Lygra_traits/tree/Drake).
 
 ## Results
+
+```{r}
+readd(nmds_plot)
+```
+
+```{r}
+readd(calluna_cover_plot)
+```
+
+```{r}
+readd(community_group_cover)
+```
+
 
 ## References
