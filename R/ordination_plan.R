@@ -31,13 +31,15 @@ ordination_plan = drake_plan(
     group_by(species) %>% 
     filter(cover > 0) %>% 
     summarise(mx = max(cover), n = n()) %>% 
-    filter(mx > 10, n > 10) %>% 
-    mutate(name_species = species),
+    filter(mx > 20, n > 15) %>% 
+    mutate(name_species = str_replace(species, "^([A-Z][a-z]{2}).*_([a-z]{2,3}).*", "\\1_\\2")),
     
   nmds_species_plot = fortify(comm_nmds) %>% 
     filter(Score == "species") %>% 
+    left_join(spp_names, by = c("Label" = "species")) %>% 
     left_join(spp_summ, by = c("Label" = "species")) %>% 
-    ggplot(aes(x = NMDS1, y = NMDS2, label = name_species)) +
-    geom_point(shape = "+", colour = "red", size = 1) +
-    geom_text_repel()
+    ggplot(aes(x = NMDS1, y = NMDS2, label = name_species, colour = group)) +
+    geom_point(shape = "+", size = 2) +
+    scale_colour_brewer(palette = "Dark2") +
+    geom_text_repel(show.legend = FALSE)
 )

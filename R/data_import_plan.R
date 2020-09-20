@@ -3,7 +3,10 @@
 import_plan <- drake_plan(
   
   #import meta data
-  meta0 = read_xlsx(meta_download),
+  meta0 = read_xlsx(meta_download) %>% 
+    mutate(treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"), 
+           treatment = factor(treatment),
+           treatment = fct_relevel(treatment, "Unburnt")),
   
   #import environment
   env0 = read_xlsx(environment_download, na = "na"),

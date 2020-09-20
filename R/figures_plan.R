@@ -28,7 +28,7 @@ figures_plan <- drake_plan(
     geom_col() + 
     scale_fill_brewer(palette = "Set1") + 
     labs(x = "Year", y = "Cover %", fill = "Treatment") +
-    facet_grid(code ~ treatment, labeller = labeller(treatment = c(B = "Burnt", C = "Control"))) +
+    facet_grid(code ~ treatment) +
     theme(strip.text.y = element_text(angle = 0)),
   
   community_group_cover = comm %>% 

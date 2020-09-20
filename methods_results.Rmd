@@ -9,13 +9,17 @@ csl: Rmd/elsevier-harvard_rjt.csl
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 
 #set default theme
 theme_set(theme_bw())
 ```
 
 ## Methods
+
+```{r map, fig.cap = "Site map"}
+readd(map)
+```
 
 ### Software
 
@@ -28,6 +32,8 @@ renv v. `r packageVersion("renv")` [@renv] were used to ensure reproducibility.
 Code to reproduce all the analyses is archived at [https://github.com/richardjtelford/Lygra_traits/tree/Drake](https://github.com/richardjtelford/Lygra_traits/tree/Drake).
 
 ## Results
+
+
 
 ```{r nmds-plot, fig.cap = "NMDS"}
 readd(nmds_plot)
