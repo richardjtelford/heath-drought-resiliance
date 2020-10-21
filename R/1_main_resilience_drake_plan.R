@@ -13,6 +13,11 @@ library("ggvegan")
 library("patchwork")
 library("mapdata")
 library("ggrepel")
+library("conflicted")
+conflict_prefer("filter", winner = "dplyr")
+conflict_prefer("select", winner = "dplyr")
+conflict_prefer("map", winner = "purrr")
+
 
 #drake configuration
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
@@ -23,6 +28,7 @@ source("R/data_import_plan.R")
 source("R/community_cleaning_plan.R")
 source("R/figures_plan.R")
 source("R/ordination_plan.R")
+source("R/import_velle_plan.R")
 
 #source extra function
 
