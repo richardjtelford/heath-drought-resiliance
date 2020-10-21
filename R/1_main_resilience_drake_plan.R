@@ -59,6 +59,7 @@ manuscript_plan <- drake_plan(
 #### combine plans ####
 trait_plan <- bind_plans(download_plan, 
                         import_plan,
+                        import_velle_plan,
                         clean_community_plan,
                         figures_plan,
                         ordination_plan,
