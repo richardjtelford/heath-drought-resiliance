@@ -62,6 +62,9 @@ comm = comm0 %>%
                                       ),  false = plot)) %>%  
   # remove unused plots. Also drop some NA plots 
   filter(!(site == "BER" & plot %in% paste0(11:15, "."))) %>% 
+  #change one more code
+  mutate(plot = if_else(site == "ROS" & plot == "22.10.", true = "22.0", false = plot)) %>% 
+  
   #### fixing species ####
   mutate(species = case_when(
     site == 'BUO' & species %in% c('Agrostis_canina', 'Agrostis_capillaris', 'Agrostis_sp') ~ 'Agrostis_capillaris', 
