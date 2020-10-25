@@ -60,7 +60,9 @@ comm = comm0 %>%
                                       '25.0.' = '25.9.',
                                       '25.1.' = '25.0.'  
                                       ),  false = plot)) %>%  
-  # fixing species
+  # remove unused plots. Also drop some NA plots 
+  filter(!(site == "BER" & plot %in% paste0(11:15, "."))) %>% 
+  #### fixing species ####
   mutate(species = case_when(
     site == 'BUO' & species %in% c('Agrostis_canina', 'Agrostis_capillaris', 'Agrostis_sp') ~ 'Agrostis_capillaris', 
     site == 'NOV' & species == 'Agrostis_canina' ~ 'Agrostis_vinealis',
@@ -105,4 +107,4 @@ comm = comm0 %>%
   filter(experiment == "resilience") %>% 
   group_by(site, plot, year, species, group) %>% 
   summarise(cover = sum(cover, na.rm = TRUE)) 
-
+)
