@@ -21,6 +21,16 @@ theme_set(theme_bw())
 readd(map)
 ```
 
+```{r site-table}
+site_data %>% 
+  select(-Site) %>% 
+  relocate(code) %>% 
+  rename(Code = code) %>% 
+  knitr::kable(caption = "Sites")
+
+```
+
+
 ### Software
 
 All analyses were done in R v. `r getRversion()` [@R] and used
