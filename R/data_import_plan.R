@@ -62,6 +62,7 @@ SKO	Skotsvær	1309			O1	65.79602	12.219299
 TOR	Torsøya	1131			O2	65.68843	12.067688
 YST	Ytstevika	2560			O2	62.359774	5.519645", delim = "\t") %>% 
     arrange(desc(Latitude)) %>% 
+    semi_join(comm, by = c("Site" = "site")) %>% 
     mutate(code = letters[1:nrow(.)])
 )
 
