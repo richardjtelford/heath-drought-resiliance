@@ -1,10 +1,13 @@
 ## download data
 
 download_plan <- drake_plan(
+  remote_path = "Resilience (temporary)",
+  
   #meta data
   meta_download = target(
     get_file(
       node = "mv84d",
+      remote_path = remote_path,
       file = "drought.plots.xlsx",
       path = "data"
     ),
@@ -12,6 +15,7 @@ download_plan <- drake_plan(
     trigger = trigger(
       condition = need_update(
         node = "mv84d",
+        remote_path = remote_path,
         file = "drought.plots.xlsx",
         path = "data"
       )
@@ -22,6 +26,7 @@ download_plan <- drake_plan(
   environment_download = target(
     get_file(
       node = "mv84d",
+      remote_path = remote_path,
       file = "Environmental variables resilience_2020.xlsx",
       path = "data"
     ),
@@ -29,6 +34,7 @@ download_plan <- drake_plan(
     trigger = trigger(
       condition = need_update(
         node = "mv84d",
+        remote_path = remote_path,
         file = "Environmental variables resilience_2020.xlsx",
         path = "data"
       )
@@ -39,6 +45,7 @@ download_plan <- drake_plan(
   community_download = target(
     get_file(
       node = "mv84d",
+      remote_path = remote_path,
       file = "DE.1_Community.xlsx",
       path = "data"
     ),
@@ -46,6 +53,7 @@ download_plan <- drake_plan(
     trigger = trigger(
       condition = need_update(
         node = "mv84d",
+        remote_path = remote_path,
         file = "DE.1_Community.xlsx",
         path = "data"
       )
@@ -56,6 +64,7 @@ download_plan <- drake_plan(
   calluna_cover_download = target(
     get_file(
       node = "mv84d",
+      remote_path = remote_path,
       file = "Datasett resiliens med endringer LGV_29.6.2020.xlsx",
       path = "data"
     ),
@@ -63,6 +72,7 @@ download_plan <- drake_plan(
     trigger = trigger(
       condition = need_update(
         node = "mv84d",
+        remote_path = remote_path,
         file = "Datasett resiliens med endringer LGV_29.6.2020.xlsx",
         path = "data"
       )
