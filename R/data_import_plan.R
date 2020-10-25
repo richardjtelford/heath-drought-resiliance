@@ -23,7 +23,10 @@ import_plan <- drake_plan(
     filter(!(is.na(correct_name))),
     
   #import calluna cover
-  calluna_cover = read_xlsx(calluna_cover_download, sheet = "Ferdigstilling", na = "na"), 
+  calluna_cover = read_xlsx(calluna_cover_download, sheet = "Ferdigstilling", na = "na") %>% 
+    mutate(treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"), 
+           treatment = factor(treatment),
+           treatment = fct_relevel(treatment, "Unburnt")), 
     
   all_covers = read_xlsx(calluna_cover_download, sheet = "cover", na = "NA") %>% 
     #fix plot codes
