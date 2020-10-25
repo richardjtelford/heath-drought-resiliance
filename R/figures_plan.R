@@ -22,8 +22,7 @@ figures_plan <- drake_plan(
                     labels = c("Dead", "Damaged", "Live")), 
       value = as.numeric(value)) %>% 
     group_by(code, year, name, treatment) %>% 
-    summarise(value = mean(value, na.rm = TRUE)) %>%
-    mutate(treatment = factor(treatment, levels = c("C", "B"))) %>% 
+    summarise(value = mean(value, na.rm = TRUE)) %>% 
     ggplot(aes(x = factor(year), y = value, fill = name)) + 
     geom_col() + 
     scale_fill_brewer(palette = "Set1") + 
@@ -32,7 +31,7 @@ figures_plan <- drake_plan(
     theme(strip.text.y = element_text(angle = 0)),
   
   community_group_cover = comm %>% 
-    left_join(meta0, by = c("site", "plot")) %>% 
+    inner_join(meta0, by = c("site", "plot")) %>% 
     left_join(site_data, by = c("site" = "Site")) %>% 
     group_by(code, treatment, year, group) %>% 
     summarise(cover = mean(cover)) %>%
