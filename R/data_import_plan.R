@@ -9,7 +9,10 @@ import_plan <- drake_plan(
            treatment = fct_relevel(treatment, "Unburnt")),
   
   #import environment
-  env0 = read_xlsx(environment_download, na = "na"),
+  env0 = read_xlsx(environment_download, na = "na") %>% 
+    rename(plot = Plott...3) %>% 
+    #add trailing . to plot names
+    mutate(plot = if_else(!str_detect(plot, "\\.$"), true = paste0(plot, "."), false = plot)),
   
   #import community
   comm0 = read_xlsx(community_download, 
@@ -26,7 +29,8 @@ import_plan <- drake_plan(
   calluna_cover = read_xlsx(calluna_cover_download, sheet = "Ferdigstilling", na = "na") %>% 
     mutate(treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"), 
            treatment = factor(treatment),
-           treatment = fct_relevel(treatment, "Unburnt")), 
+           treatment = fct_relevel(treatment, "Unburnt")) %>% 
+    mutate(plot = if_else(!str_detect(plot, "\\.$"), true = paste0(plot, "."), false = plot)), 
     
   seedlings = read_xlsx(calluna_cover_download, sheet = "seedling", na = "na"), 
   
