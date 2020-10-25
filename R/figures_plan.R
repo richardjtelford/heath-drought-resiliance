@@ -3,10 +3,10 @@ figures_plan <- drake_plan(
   map  = { 
     mp = map_data("worldHires", xlim = c(0, 40), ylim = c(55, 75))
     ggplot(site_data, aes(x = Longitude, y = Latitude, label = code)) +
-      geom_map(data = mp, map = mp, aes(map_id = region), inherit.aes = FALSE, fill = "grey70", colour = "grey40") +
+      geom_map(data = mp, map = mp, aes(map_id = region), inherit.aes = FALSE, fill = "grey75", colour = "grey50") +
       geom_point() +
-      geom_label_repel(direction  = "x") +
-      coord_quickmap(xlim = c(NA, 28), ylim = c(58.2, 71)) +
+      geom_label_repel(direction  = "x", force = 2, point.padding = 0.2) +
+      coord_quickmap(xlim = c(NA, 27), ylim = c(58.2, 71)) +
       labs(x = "°E", y = "°N")
   },
   
