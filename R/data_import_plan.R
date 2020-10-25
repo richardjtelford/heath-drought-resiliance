@@ -28,6 +28,8 @@ import_plan <- drake_plan(
            treatment = factor(treatment),
            treatment = fct_relevel(treatment, "Unburnt")), 
     
+  seedlings = read_xlsx(calluna_cover_download, sheet = "seedling", na = "na"), 
+  
   all_covers = read_xlsx(calluna_cover_download, sheet = "cover", na = "NA") %>% 
     #fix plot codes
     mutate(

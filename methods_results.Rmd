@@ -49,6 +49,10 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 readd(nmds_plot)
 ```
 
+```{r species_ordination_plot, fig.cap = "Too many species"}
+readd(nmds_species_plot)
+```
+
 ```{r calluna-cover-plot, fig.cap = "Changes of _Calluna_ cover over time by health status. Sites are arranged from north-south."}
 readd(calluna_cover_plot)
 ```
@@ -57,8 +61,10 @@ readd(calluna_cover_plot)
 readd(community_group_cover)
 ```
 
-```{r species_ordination_plot, fig.cap = "Too many species"}
-readd(nmds_species_plot)
+```{r seedling-plot, fig.cap = "Number of _Calluna_ seedlings over time."}
+readd(seedling_plot)
 ```
+
+
 
 ## References

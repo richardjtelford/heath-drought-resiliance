@@ -30,6 +30,7 @@ figures_plan <- drake_plan(
     facet_grid(code ~ treatment) +
     theme(strip.text.y = element_text(angle = 0)),
   
+  #community cover
   community_group_cover = comm %>% 
     inner_join(meta0, by = c("site", "plot")) %>% 
     left_join(site_data, by = c("site" = "Site")) %>% 
@@ -40,5 +41,21 @@ figures_plan <- drake_plan(
     scale_fill_brewer(palette = "Dark2") +
     facet_grid(code ~ treatment) +
     labs(x = "Year", y = "Cover %", fill = "Functional Group") +
+    theme(strip.text.y = element_text(angle = 0)),
+  
+  #seedling plot
+  seedling_plot = seedlings %>% 
+    left_join(meta0, by = c("site", "plot")) %>% 
+    left_join(site_data,  by = c("site" = "Site")) %>% 
+    filter(treatment == "Burnt") %>% 
+    ggplot(aes(x = year, y = seedlings_total, group = plot)) +
+    geom_line() + 
+    scale_x_continuous(breaks = 2017:2019) +
+    facet_grid(code ~ .) +
+    labs(x = "Year", y = "Number of Calluna seedlings") +
     theme(strip.text.y = element_text(angle = 0))
+  
+  
 )
+
+  
