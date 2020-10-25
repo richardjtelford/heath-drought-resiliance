@@ -1,6 +1,6 @@
 ordination_plan = drake_plan(
   comm_fat = comm %>% 
-    left_join(
+    inner_join(
       select(meta0, plot, treatment),
       by = "plot") %>%
     left_join(site_data, by = c("site" = "Site")) %>% 
@@ -19,11 +19,15 @@ ordination_plan = drake_plan(
     filter(Score == "sites") %>% 
     bind_cols(comm_fat %>% select(code, plot, year, treatment)),
   
-  nmds_plot = ggplot(comm_fort, aes(x = NMDS1, y = NMDS2,  linetype = treatment ,colour = code, shape = treatment)) +
+  nmds_plot = ggplot(comm_fort, aes(x = NMDS1, y = NMDS2, colour = code)) +
     geom_point(aes(size = year == min(year))) + 
     geom_path(aes(group = plot)) +
     scale_size_discrete(range = c(1, 2)) +
-    labs(colour = "Site", size = "First year", linetype = "Treatment", shape = "Treatment"),
+    scale_colour_brewer(palette = "Dark2") +
+    scale_y_continuous(breaks = c(-1, 0, 1)) +
+    labs(colour = "Site", size = "First year") +
+    coord_equal() +
+    facet_wrap(~ treatment),
   
   # species in nmds plot
   
