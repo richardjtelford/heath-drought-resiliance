@@ -5,9 +5,8 @@
 import_velle_plan <- drake_plan(
   
   velle_species1 = read_xlsx(
-    path = "data/Species subscribed to groups_LP_SVH_LGV_14.10.2020.xlsx",
-    sheet = "Sheet1",
-    col_types = c(rep("text", 3), "skip", "text")) %>% 
+    path = "data/Species subscribed to groups_succession_increase_decrease_22.10.2020.xlsx",
+    sheet = "Sheet1") %>% 
     rename_with(~str_replace(.x, " ", "_")) %>%
     rename(Latin = Latin_name) %>% 
     mutate(Latin = str_replace(Latin, "_", " ")),
@@ -46,9 +45,35 @@ import_velle_plan <- drake_plan(
       cols = -c("site", "habitat", "treatment", "block", "plot", "year"),
       names_to = "Abbreviation", 
       values_to = "cover") %>% 
-    left_join(velle_species, by = "Abbreviation")
+    mutate(
+      cover = if_else(is.na(cover), true = 0, false = cover),
+      percent = case_when(
+        cover == 0 ~ 0,
+        cover == 2 ~ (0 + 1)/2,
+        cover == 3 ~ (1.0 + 3.125)/2,
+        cover == 4 ~ (3.125 + 6.25)/2,
+        cover == 5 ~ (6.25 + 12.5)/2,
+        cover == 6 ~ (12.5 + 25.0)/2,
+        cover == 7 ~ (25 + 50)/2,
+        cover == 8 ~ (50 + 75)/2,
+        cover == 9 ~ (75 + 100)/2, 
+        TRUE ~ NA_real_ #unexpected value
+      )
+    ) %>%
+   left_join(velle_species, by = "Abbreviation")
 )
 
+# velle_community_long %>%
+#   group_by(site, year, habitat, Group.x,  block, plot) %>% 
+#   summarise(percent = sum(percent)) %>%
+#   group_by(site, year, Group.x) %>% 
+#   summarise(percent = mean(percent)) %>%
+#   ggplot(aes(x = year, y = percent, fill = Group.x)) +
+#   geom_col() + 
+#   scale_fill_brewer(palette = "Dark2") +
+#   facet_wrap(~ site, ncol = 1, strip.position = "right") +
+#   labs(x = "Year", y = "Cover %", fill = "Functional Group") +
+#   theme(strip.text.y = element_text(angle = 0))
 
 
   
