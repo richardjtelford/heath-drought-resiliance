@@ -61,9 +61,26 @@ readd(calluna_cover_plot)
 readd(community_group_cover)
 ```
 
-```{r seedling-plot, fig.cap = "Number of _Calluna_ seedlings over time."}
+```{r seedling-plot, fig.cap = "Number of _Calluna_ seedlings over time in burnt plots."}
 readd(seedling_plot)
 ```
+
+```{r damage-latitude, fig.cap="Proportion _Calluna_ dead against Latitude"}
+
+  readd(damage_lat_plot)
+```
+
+
+```{r damage-aspect, fig.cap = "Proportion _Calluna_ dead against cos(Aspect)"}
+  readd(damage_north_plot)
+```
+
+
+```{r damage-depth, fig.cap = "Proportion _Calluna_ dead against mean peat depth"}
+  readd(  damage_depth_plot)
+```
+
+
 
 
 

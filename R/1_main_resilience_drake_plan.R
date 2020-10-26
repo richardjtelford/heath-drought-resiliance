@@ -29,6 +29,7 @@ source("R/community_cleaning_plan.R")
 source("R/figures_plan.R")
 source("R/ordination_plan.R")
 source("R/import_velle_plan.R")
+source("R/damage_plan.R")
 
 #source extra function
 
@@ -63,6 +64,7 @@ trait_plan <- bind_plans(download_plan,
                         clean_community_plan,
                         figures_plan,
                         ordination_plan,
+                        damage_plan,
                         manuscript_plan)
 #quick plot
 plot(trait_plan)
