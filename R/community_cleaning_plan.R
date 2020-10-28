@@ -36,14 +36,14 @@ comm = comm0 %>%
                                      '22.6.' = '22.7.',
                                      '22.7.' = '22.5.',
                                      '22.9.' = '22.10.',
-                                     '22.10.' = '22.9.'
+                                     '22.0.' = '22.9.'
                        ), false = plot),
          plot = ifelse(site == 'ROS' & plot == '22.10', '22.0.', plot),
          plot = ifelse(site == 'SKO' & plot == '25.10', '25.0.', plot),
          plot = ifelse(site == 'TOR' & year == '2018' & plot == '14', '24.14.', plot),
          plot = ifelse(site == 'TOR' & year == '2018' & plot == '16', '24.16.', plot),
          plot = ifelse(site == 'ROS' & year == '2017' & plot == '22.9.', '22.0.', plot),
-         plot = ifelse(site == 'ROS' & year == '2017' & plot == '22.0', '22.9.', plot),
+         plot = ifelse(site == 'ROS' & year == '2017' & plot == '22.0.', '22.9.', plot),
          plot = str_replace(plot, pattern = "$" , replacement =  "."),       # This fix the plot number issue on TOR 
          plot = str_replace(plot, pattern = "\\.\\.", replacement = ".")) %>% 
   mutate(plot = if_else(site == 'SKO' & !year == '2017' , #SKO were misplaced with one in three years
