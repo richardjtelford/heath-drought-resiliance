@@ -22,6 +22,7 @@ readd(map)
 ```
 
 ```{r site-table}
+loadd(site_data)
 site_data %>% 
   select(-Site) %>% 
   relocate(code) %>% 
@@ -63,23 +64,46 @@ readd(community_group_cover)
 readd(seedling_plot)
 ```
 
-```{r damage-latitude, fig.cap="Proportion _Calluna_ dead against Latitude"}
+## Proportion Dead
+
+```{r dead-latitude, fig.cap="Proportion _Calluna_ dead against Latitude"}
+  readd(dead_lat_plot)
+```
+
+
+```{r dead-aspect, fig.cap = "Proportion _Calluna_ dead against cos(Aspect)"}
+  readd(dead_north_plot)
+```
+
+
+```{r dead-depth, fig.cap = "Proportion _Calluna_ dead against mean peat depth"}
+  readd(dead_depth_plot)
+```
+
+
+```{r dead-slope, fig.cap = "Proportion _Calluna_ dead against slope"}
+  readd(dead_slope_plot)
+```
+
+## dead & damaged
+
+```{r damage-latitude, fig.cap="Proportion _Calluna_ dead and damaged against Latitude"}
   readd(damage_lat_plot)
 ```
 
 
-```{r damage-aspect, fig.cap = "Proportion _Calluna_ dead against cos(Aspect)"}
+```{r damage-aspect, fig.cap = "Proportion _Calluna_ dead and damaged against cos(Aspect)"}
   readd(damage_north_plot)
 ```
 
 
-```{r damage-depth, fig.cap = "Proportion _Calluna_ dead against mean peat depth"}
+```{r damage-depth, fig.cap = "Proportion _Calluna_ dead and damaged against mean peat depth"}
   readd(damage_depth_plot)
 ```
 
 
 
-```{r damage-depth, fig.cap = "Proportion _Calluna_ dead against slope"}
+```{r damage-slope, fig.cap = "Proportion _Calluna_ dead and damaged against slope"}
   readd(damage_slope_plot)
 ```
 
