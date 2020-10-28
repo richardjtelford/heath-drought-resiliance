@@ -43,8 +43,6 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 
 ## Results
 
-
-
 ```{r nmds-plot, fig.cap = "NMDS"}
 readd(nmds_plot)
 ```
@@ -61,12 +59,11 @@ readd(calluna_cover_plot)
 readd(community_group_cover)
 ```
 
-```{r seedling-plot, fig.cap = "Number of _Calluna_ seedlings over time in burnt plots."}
+```{r seedling-plot, fig.cap = "Number of _Calluna_ seedlings over time in burnt plots.", fig.width = 80/25.4}
 readd(seedling_plot)
 ```
 
 ```{r damage-latitude, fig.cap="Proportion _Calluna_ dead against Latitude"}
-
   readd(damage_lat_plot)
 ```
 
@@ -77,11 +74,13 @@ readd(seedling_plot)
 
 
 ```{r damage-depth, fig.cap = "Proportion _Calluna_ dead against mean peat depth"}
-  readd(  damage_depth_plot)
+  readd(damage_depth_plot)
 ```
 
 
 
-
+```{r damage-depth, fig.cap = "Proportion _Calluna_ dead against slope"}
+  readd(damage_slope_plot)
+```
 
 ## References
