@@ -5,8 +5,15 @@ import_plan <- drake_plan(
   #import meta data
   meta0 = read_xlsx(meta_download) %>% 
     mutate(treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"), 
+           #fix wrong treatments
+           treatment = case_when(
+             plot == "22.0." ~ "Unburnt",
+             plot == "22.9."  ~ "Burnt",
+             TRUE ~ treatment
+           ),
            treatment = factor(treatment),
-           treatment = fct_relevel(treatment, "Unburnt")),
+           treatment = fct_relevel(treatment, "Unburnt")
+           ),
   
   #import environment
   env0 = read_xlsx(environment_download, na = "na") %>% 
@@ -72,6 +79,8 @@ TOR	Torsøya	1131			O2	65.68843	12.067688
 YST	Ytstevika	2560			O2	62.359774	5.519645", delim = "\t") %>% 
     arrange(desc(Latitude)) %>% 
     semi_join(comm, by = c("Site" = "site")) %>% 
-    mutate(code = letters[1:nrow(.)])
+    mutate(
+      code = factor(letters[nrow(.):1]),
+      code = fct_rev(code))
 )
 
