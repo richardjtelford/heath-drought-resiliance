@@ -13,6 +13,7 @@ library("ggvegan")
 library("patchwork")
 library("mapdata")
 library("ggrepel")
+library("lubridate")
 library("conflicted")
 conflict_prefer("filter", winner = "dplyr")
 conflict_prefer("select", winner = "dplyr")
@@ -30,6 +31,7 @@ source("R/figures_plan.R")
 source("R/ordination_plan.R")
 source("R/import_velle_plan.R")
 source("R/damage_plan.R")
+source("R/weather_plan.R")
 
 #source extra function
 
@@ -65,6 +67,7 @@ trait_plan <- bind_plans(download_plan,
                         figures_plan,
                         ordination_plan,
                         damage_plan,
+                        weather_plan,
                         manuscript_plan)
 #quick plot
 plot(trait_plan)

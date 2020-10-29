@@ -107,4 +107,11 @@ readd(seedling_plot)
   readd(damage_slope_plot)
 ```
 
+## Weather plot
+
+```{r weather-plot, fig.cap = "Air temperature and relative humidity for January and February 2014"}
+  readd(weather_plot)
+```
+
+
 ## References
