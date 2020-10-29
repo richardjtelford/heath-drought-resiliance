@@ -19,7 +19,7 @@ figures_plan <- drake_plan(
     mutate(
       name = factor(name, 
                     levels = c("dead_korr", "damaged_korr", "vital_korr"), 
-                    labels = c("Dead", "Damaged", "Live")), 
+                    labels = c("Dead", "Damaged", "Healthy")), 
       value = as.numeric(value)) %>% 
     group_by(code, year, name, treatment) %>% 
     summarise(value = mean(value, na.rm = TRUE)) %>% 
