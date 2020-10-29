@@ -44,6 +44,15 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 
 ## Results
 
+```{r pca-plot, fig.cap="PCA of square root transformed cover"}
+readd(PCA_plot)
+```
+
+```{r pca-sceeplot, fig.cap="Screeplot. Broken stick not meaningful with these data - probably because of the clustered data."}
+screeplot(readd(PCA))
+```
+
+
 ```{r nmds-plot, fig.cap = "NMDS"}
 readd(nmds_plot)
 ```

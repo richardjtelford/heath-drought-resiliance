@@ -45,5 +45,26 @@ ordination_plan = drake_plan(
     ggplot(aes(x = NMDS1, y = NMDS2, label = name_species, colour = group)) +
     geom_point(shape = "+", size = 2) +
     scale_colour_brewer(palette = "Dark2") +
-    geom_text_repel(show.legend = FALSE)
+    geom_text_repel(show.legend = FALSE), 
+  
+  #### PCA ####
+  PCA = comm_fat %>%
+    select(-(site:code)) %>% 
+    sqrt() %>% 
+    rda(),
+  
+  PCA_fort = fortify(PCA) %>% 
+    filter(Score == "sites") %>% 
+    bind_cols(comm_fat %>% select(code, plot, year, treatment)),
+  
+  PCA_plot = ggplot(PCA_fort, aes(x = PC1, y = PC2, colour = code)) +
+    geom_point(aes(size = year == min(year))) + 
+    geom_path(aes(group = plot)) +
+    scale_size_discrete(range = c(1, 2)) +
+    scale_colour_brewer(palette = "Dark2") +
+    scale_y_continuous(breaks = c(-1, 0, 1)) +
+    labs(colour = "Site", size = "First year") +
+    coord_equal() +
+    facet_wrap(~ treatment)
+  
 )
