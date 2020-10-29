@@ -1,7 +1,7 @@
 ## download data
 
 download_plan <- drake_plan(
-  remote_path = "Resilience (temporary)",
+  remote_path = "Plant community/Resilience (temporary)",
   
   #meta data
   meta_download = target(
