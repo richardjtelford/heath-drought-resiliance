@@ -113,5 +113,12 @@ readd(seedling_plot)
   readd(weather_plot)
 ```
 
+## Climate plot
+
+```{r climate-plot, fig.cap = "Mean relative humidity for January and February at the nearest weather station to each field site. The black bar represents the 2014 condtions."}
+readd(climate_plot)
+```
+
+
 
 ## References
