@@ -3,72 +3,60 @@ damage_plan <- drake_plan(
     mutate(
       prop_dead = dead_korr / (dead_korr + damaged_korr + vital_korr), 
       prop_damaged = damaged_korr / (dead_korr + damaged_korr + vital_korr), 
-      prop_dead_damaged = prop_dead + prop_damaged) %>% 
+      prop_healthy = vital_korr/ (dead_korr + damaged_korr + vital_korr)
+    ) %>% 
   left_join(env0, by = "plot") %>% 
     left_join(site_data, by = c("lokalitet" = "Site")) %>%
     filter(year == 2016) %>% 
     mutate(north = cos(Aspect * pi /180), 
            meanPeatDepth = (Torvdjupne1+Torvdjupne2+Torvdjupne3 + Torvdjupne4+Torvdjupne5)/5
-           ),
+           ) %>% 
+    select(-ends_with("korr"), -ends_with("org"), -matches("\\d$")) %>% 
+    pivot_longer(starts_with("prop"), names_to = "vitality", values_to = "value") %>% 
+    mutate(vitality = factor(vitality, levels = c("prop_dead", "prop_damaged", "prop_healthy"))),
  
   dead_damage_lat_plot = damage_model_data %>% 
-    select(code, Latitude, year, prop_dead, prop_damaged) %>%
-    pivot_longer(starts_with("prop"), names_to = "name", values_to = "value") %>% 
-    {ggplot(., aes(x = Latitude, y = value, colour = code, shape = name)) + 
+    {ggplot(., aes(x = Latitude, y = value, colour = code, shape = vitality)) + 
         geom_point(show.legend = FALSE, position = position_dodge(width = 0.06)) +
-        geom_label_repel(aes(x = Latitude, y = 0, colour = code, label = code,), 
-                     data = distinct(., code, Latitude), 
-                     direction = "x", nudge_x = 0.1, show.legend = FALSE, inherit.aes = FALSE) +
+        geom_label_repel(
+          aes(x = Latitude, y = 0, colour = code, label = code),
+          data = distinct(., code, Latitude),
+          direction = "x",
+          nudge_y = -0.02,
+          show.legend = FALSE,
+          inherit.aes = FALSE
+        ) +
         scale_colour_brewer(palette = "Dark2") +
-        scale_shape_manual(limits = c("prop_dead", "prop_damaged"), values = c(16, 1)) +
+        scale_shape_manual(
+          limits = c("prop_dead", "prop_damaged", "prop_healthy"),
+          values = c(4, 1, 16)) +
         new_scale_color() +
-        geom_smooth(aes(colour = name, group = name, linetype = name), se = FALSE, show.legend = FALSE) +
-        scale_colour_manual(limits = c("prop_dead", "prop_damaged"), values = c("black", "grey60")) +
-        scale_linetype_manual(limits = c("prop_dead", "prop_damaged"), values = c("solid", "dashed")) +
-        
-        labs(x = "Latitude °N", y = "Proportion Calluna Dead or Damaged")
-  }  
+        geom_smooth(
+          aes(colour = vitality, group = vitality, linetype = vitality), 
+          se = FALSE, show.legend = FALSE) +
+        scale_colour_brewer(limits = c("prop_dead", "prop_damaged", "prop_healthy"), palette = "Set1") +
+        scale_linetype_manual(
+          values = c("dotted", "dashed", "solid")) +
+        ylim(0, 1) + 
+        labs(x = "Latitude °N", y = expression(Proportion~ italic(Calluna)~"dead, damaged or healthy"))
+  },  
   
-   
-  dead_lat_plot = ggplot(damage_model_data, aes(x = Latitude, y = prop_dead, colour = code, label = code)) + 
-    geom_point(show.legend = FALSE) +
-    geom_smooth(aes(group = 1), se = FALSE, show.legend = FALSE) +
-    geom_label_repel(aes(y = 0), 
-                     data = distinct(damage_model_data, code, Latitude), 
-                     direction = "x", nudge_x = 0.1, show.legend = FALSE) +
-    scale_colour_brewer(palette = "Dark2") +
-    labs(x = "Latitude °N", y = "Proportion Calluna Dead"),
+
   
-  dead_north_plot = ggplot(damage_model_data, aes(x = north, y = prop_dead, colour = code)) + 
+  dead_depth_plot = ggplot(damage_model_data, aes(x = meanPeatDepth, y = value, colour = code)) + 
     geom_point(data = select(damage_model_data, -code), colour = "grey70") +
     geom_point(show.legend = FALSE) +
-    facet_wrap(~ code) +
-    labs(x = "North, cos(Aspect °)", y = "Proportion Calluna dead") +
+    facet_grid(code ~ vitality, labeller = labeller(vitality = c("prop_dead" = "Dead", "prop_damaged" = "Damaged", "prop_healthy" = "Healthy"))) +
+    scale_y_continuous(breaks = c(0, 0.5, 1)) +
+    labs(x = "Mean peat depth cm", y = expression(Proportion~italic(Calluna))) +
     scale_colour_brewer(palette = "Dark2"),
   
-  dead_depth_plot = dead_north_plot +
-    aes(x = meanPeatDepth) +
-    labs(x = "Mean peat depth cm"),
+  dead_north_plot = dead_depth_plot +
+    aes(x = north) +
+    labs(x = "Aspect") +
+    scale_x_continuous(breaks = seq(-1, 1, 0.5), labels = c("S", "SE/SW", "E/W", "NE/NW", "N")),
   
-  dead_slope_plot = dead_north_plot +
+  dead_slope_plot = dead_depth_plot +
     aes(x = `Slope (°)`) +
-    labs(x = "Slope (°)"),
-  
-  ## dead + damaged
-  damage_lat_plot = dead_lat_plot + 
-    aes(y = prop_dead_damaged) +
-    labs(y = "Proportion Calluna Dead & Damaged"),
-  
-  damage_north_plot = dead_north_plot + 
-    aes(y = prop_dead_damaged) +
-    labs(y = "Proportion Calluna Dead & Damaged"),
-  
-  damage_depth_plot = dead_depth_plot + 
-    aes(y = prop_dead_damaged) +
-    labs(y = "Proportion Calluna Dead & Damaged"),
-  
-  damage_slope_plot = dead_slope_plot +
-    aes(y = prop_dead_damaged) +
-    labs(y = "Proportion Calluna Dead & Damaged"),
-  
+    labs(x = "Slope (°)")
 )

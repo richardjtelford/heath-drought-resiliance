@@ -75,46 +75,26 @@ readd(seedling_plot)
 
 ## Proportion Dead
 
-```{r dead-damaged-latitude, fig.cap="Proportion _Calluna_ dead (solid symbols, solid black line) or damaged (open symbols, dashed line) in 2016 against Latitude. "}
+```{r dead-damaged-latitude, fig.cap="Proportion _Calluna_ dead (crosses, dotted red line),  damaged (open symbols, dashed blue line) or healthy (solid symbols, solid green line) in 2016 against Latitude. "}
   readd(dead_damage_lat_plot)
 ```
 
 
-```{r dead-aspect, fig.cap = "Proportion _Calluna_ dead against cos(Aspect)"}
+```{r dead-aspect, fig.cap = "Proportion _Calluna_ dead, damaged or healthy aspect"}
   readd(dead_north_plot)
 ```
 
 
-```{r dead-depth, fig.cap = "Proportion _Calluna_ dead against mean peat depth"}
+```{r dead-depth, fig.cap = "Proportion _Calluna_ dead, damaged or healthy  against mean peat depth"}
   readd(dead_depth_plot)
 ```
 
 
-```{r dead-slope, fig.cap = "Proportion _Calluna_ dead against slope"}
+```{r dead-slope, fig.cap = "Proportion _Calluna_ dead, damaged or healthy against slope"}
   readd(dead_slope_plot)
 ```
 
-## dead & damaged
 
-```{r damage-latitude, fig.cap="Proportion _Calluna_ dead and damaged against Latitude"}
-  readd(damage_lat_plot)
-```
-
-
-```{r damage-aspect, fig.cap = "Proportion _Calluna_ dead and damaged against cos(Aspect)"}
-  readd(damage_north_plot)
-```
-
-
-```{r damage-depth, fig.cap = "Proportion _Calluna_ dead and damaged against mean peat depth"}
-  readd(damage_depth_plot)
-```
-
-
-
-```{r damage-slope, fig.cap = "Proportion _Calluna_ dead and damaged against slope"}
-  readd(damage_slope_plot)
-```
 
 ## Weather plot
 
