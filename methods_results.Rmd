@@ -48,8 +48,17 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 readd(PCA_plot)
 ```
 
+```{r pca-plot13, fig.cap="PCA of square root transformed cover, axes 1 & 3"}
+readd(PCA13_plot)
+```
+
+
 ```{r pca-sceeplot, fig.cap="Screeplot. Broken stick not meaningful with these data - probably because of the clustered data."}
 screeplot(readd(PCA))
+```
+
+```{r species_PCA_plot, fig.cap = "Badly behaved species"}
+readd(PCA_species_plot)
 ```
 
 

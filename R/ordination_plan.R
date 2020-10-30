@@ -58,13 +58,25 @@ ordination_plan = drake_plan(
     bind_cols(comm_fat %>% select(code, plot, year, treatment)),
   
   PCA_plot = ggplot(PCA_fort, aes(x = PC1, y = PC2, colour = code)) +
-    geom_point(aes(size = year == min(year))) + 
+    geom_point(aes(size = factor(year == min(year), levels = c("TRUE", "FALSE")))) + 
     geom_path(aes(group = plot)) +
-    scale_size_discrete(range = c(1, 2)) +
+    scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
     scale_colour_brewer(palette = "Dark2") +
     scale_y_continuous(breaks = c(-1, 0, 1)) +
-    labs(colour = "Site", size = "First year") +
+    labs(colour = "Site", size = "Year") +
     coord_equal() +
-    facet_wrap(~ treatment)
+    facet_wrap(~ treatment), 
+  
+  
+  PCA13_plot = PCA_plot + aes(x = PC1, y = PC3), 
+  
+  PCA_species_plot = fortify(PCA) %>% 
+    filter(Score == "species") %>% 
+    left_join(spp_names, by = c("Label" = "species")) %>% 
+    left_join(spp_summ, by = c("Label" = "species")) %>% 
+    ggplot(aes(x = PC1, y = PC2, label = name_species, colour = group)) +
+    geom_point(shape = "+", size = 2) +
+    scale_colour_brewer(palette = "Dark2") +
+    geom_text_repel(show.legend = FALSE), 
   
 )
