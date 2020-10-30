@@ -75,8 +75,8 @@ readd(seedling_plot)
 
 ## Proportion Dead
 
-```{r dead-latitude, fig.cap="Proportion _Calluna_ dead against Latitude"}
-  readd(dead_lat_plot)
+```{r dead-damaged-latitude, fig.cap="Proportion _Calluna_ dead (solid symbols, solid black line) or damaged (open symbols, dashed line) in 2016 against Latitude. "}
+  readd(dead_damage_lat_plot)
 ```
 
 

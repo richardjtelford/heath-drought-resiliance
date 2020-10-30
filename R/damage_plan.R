@@ -2,14 +2,34 @@ damage_plan <- drake_plan(
   damage_model_data = calluna_cover %>%
     mutate(
       prop_dead = dead_korr / (dead_korr + damaged_korr + vital_korr), 
-      prop_dead_damaged = (dead_korr + damaged_korr) / (dead_korr + damaged_korr + vital_korr)) %>% 
-    left_join(env0, by = "plot") %>% 
+      prop_damaged = damaged_korr / (dead_korr + damaged_korr + vital_korr), 
+      prop_dead_damaged = prop_dead + prop_damaged) %>% 
+  left_join(env0, by = "plot") %>% 
     left_join(site_data, by = c("lokalitet" = "Site")) %>%
     filter(year == 2016) %>% 
     mutate(north = cos(Aspect * pi /180), 
            meanPeatDepth = (Torvdjupne1+Torvdjupne2+Torvdjupne3 + Torvdjupne4+Torvdjupne5)/5
            ),
+ 
+  dead_damage_lat_plot = damage_model_data %>% 
+    select(code, Latitude, year, prop_dead, prop_damaged) %>%
+    pivot_longer(starts_with("prop"), names_to = "name", values_to = "value") %>% 
+    {ggplot(., aes(x = Latitude, y = value, colour = code, shape = name)) + 
+        geom_point(show.legend = FALSE, position = position_dodge(width = 0.06)) +
+        geom_label_repel(aes(x = Latitude, y = 0, colour = code, label = code,), 
+                     data = distinct(., code, Latitude), 
+                     direction = "x", nudge_x = 0.1, show.legend = FALSE, inherit.aes = FALSE) +
+        scale_colour_brewer(palette = "Dark2") +
+        scale_shape_manual(limits = c("prop_dead", "prop_damaged"), values = c(16, 1)) +
+        new_scale_color() +
+        geom_smooth(aes(colour = name, group = name, linetype = name), se = FALSE, show.legend = FALSE) +
+        scale_colour_manual(limits = c("prop_dead", "prop_damaged"), values = c("black", "grey60")) +
+        scale_linetype_manual(limits = c("prop_dead", "prop_damaged"), values = c("solid", "dashed")) +
+        
+        labs(x = "Latitude °N", y = "Proportion Calluna Dead or Damaged")
+  }  
   
+   
   dead_lat_plot = ggplot(damage_model_data, aes(x = Latitude, y = prop_dead, colour = code, label = code)) + 
     geom_point(show.legend = FALSE) +
     geom_smooth(aes(group = 1), se = FALSE, show.legend = FALSE) +
