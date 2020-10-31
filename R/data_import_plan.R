@@ -30,8 +30,16 @@ import_plan <- drake_plan(
            cover = as.numeric(cover)),
   
   spp_names = read_xlsx(community_download, sheet = 'corr_names') %>% 
-    filter(!(is.na(correct_name))),
-    
+    filter(!(is.na(correct_name))) %>% 
+    distinct(species, .keep_all = TRUE) %>% #Remove duplicates
+    mutate(
+      group = case_when(
+        correct_name == "Moss_sp" ~ "Bryophyte", 
+        correct_name == "Kalmia_procumbens" ~ "Ericales",
+        TRUE ~ group),
+      species = if_else(correct_name == "Hyperikum_maculatum", "Hypericum_maculatum", correct_name)
+    ),
+  
   #import calluna cover
   calluna_cover = read_xlsx(calluna_cover_download, sheet = "Ferdigstilling", na = "na") %>% 
     mutate(treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"), 
@@ -42,6 +50,7 @@ import_plan <- drake_plan(
   seedlings = read_xlsx(calluna_cover_download, sheet = "seedling", na = "na"), 
   
   all_covers = read_xlsx(calluna_cover_download, sheet = "cover", na = "NA") %>% 
+    select(-pellets, -metode, -...43, -...44) %>% #has problems but unused in analysis
     #fix plot codes
     mutate(
       #add dot at end
@@ -57,14 +66,15 @@ import_plan <- drake_plan(
     ) %>% 
     #fix non-numeric values in data
     mutate(
-      across(everything(), ~str_replace(.x, ",", ".")), #change "," to "."
-      across(everything(), ~str_replace(.x, ".$", "")), #fix stray "." after number
-      across(everything(), ~str_replace(.x, "^+$", "1")), #change "+" to "1"
-      across(everything(), ~if_else(.x == "N", NA_character_, .x)), #change "N" to NA
+      across(-plot, ~str_replace(.x, ",", ".")), #change "," to "."
+      across(-plot, ~str_replace(.x, "\\.$", "")), #fix stray "." after number
+      across(-plot, ~str_replace(.x, "^+$", "1")), #change "+" to "1"
+      across(-plot, ~if_else(.x == "N", NA_character_, .x)), #change "N" to NA
     ) %>% 
     #convert to numeric
-    #will lose ~100 non-numeric values at the moment
-    mutate(across(max_height1:cover_bryophytes, as.numeric)),
+    #will lose ~30 non-numeric values at the moment
+    mutate(across(max_height1:cover_bryophytes, as.numeric)) %>% 
+    mutate(mean_max_height = rowMeans(select(., starts_with("max_height"), na.rm = TRUE))),
   
   site_data = read_delim("Site\tSite name	Mean annual precipitation (mm)	Mean January temperature (C)	Mean July temperature (C)	Biogeographic section (Moen, 1998)	Latitude	Longitude
 BER	Bergsnova	1535			O2	64.841056	10.848461

@@ -40,7 +40,7 @@ ordination_plan = drake_plan(
     
   nmds_species_plot = fortify(comm_nmds) %>% 
     filter(Score == "species") %>% 
-    left_join(spp_names, by = c("Label" = "species")) %>% 
+    left_join(distinct(spp_names, correct_name, group), by = c("Label" = "correct_name")) %>% 
     left_join(spp_summ, by = c("Label" = "species")) %>% 
     ggplot(aes(x = NMDS1, y = NMDS2, label = name_species, colour = group)) +
     geom_point(shape = "+", size = 2) +
@@ -72,7 +72,7 @@ ordination_plan = drake_plan(
   
   PCA_species_plot = fortify(PCA) %>% 
     filter(Score == "species") %>% 
-    left_join(spp_names, by = c("Label" = "species")) %>% 
+    left_join(distinct(spp_names, correct_name, group), by = c("Label" = "correct_name")) %>% 
     left_join(spp_summ, by = c("Label" = "species")) %>% 
     ggplot(aes(x = PC1, y = PC2, label = name_species, colour = group)) +
     geom_point(shape = "+", size = 2) +
