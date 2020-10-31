@@ -37,7 +37,7 @@ import_plan <- drake_plan(
         correct_name == "Moss_sp" ~ "Bryophyte", 
         correct_name == "Kalmia_procumbens" ~ "Ericales",
         TRUE ~ group),
-      species = if_else(correct_name == "Hyperikum_maculatum", "Hypericum_maculatum", correct_name)
+      correct_name = if_else(correct_name == "Hyperikum_maculatum", "Hypericum_maculatum", correct_name)
     ),
   
   #import calluna cover
@@ -74,7 +74,7 @@ import_plan <- drake_plan(
     #convert to numeric
     #will lose ~30 non-numeric values at the moment
     mutate(across(max_height1:cover_bryophytes, as.numeric)) %>% 
-    mutate(mean_max_height = rowMeans(select(., starts_with("max_height"), na.rm = TRUE))),
+    mutate(mean_max_height = rowMeans(select(., starts_with("max_height")), na.rm = TRUE)),
   
   site_data = read_delim("Site\tSite name	Mean annual precipitation (mm)	Mean January temperature (C)	Mean July temperature (C)	Biogeographic section (Moen, 1998)	Latitude	Longitude
 BER	Bergsnova	1535			O2	64.841056	10.848461
