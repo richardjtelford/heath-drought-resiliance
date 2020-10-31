@@ -7,6 +7,13 @@ clean_community_plan = drake_plan(
 # Cleaning species names (when species list are clean, check it with a proper taxonomy list)
   
 comm = comm0 %>% 
+  #keep only resilience data
+  mutate(experiment = tolower(experiment)) %>% #fix case error
+  filter(experiment == "resilience") %>% 
+  # remove cover  == 0
+  filter(cover > 0) %>% 
+  
+  #fix of species names
   mutate(species = case_when(
     species == "cladonia_sp" ~ "Cladonia_sp",
     species == "llex_aquifolium" ~ "Ilex_aquifolium",
@@ -15,6 +22,8 @@ comm = comm0 %>%
   left_join(spp_names, by= 'species') %>% 
   mutate(species = coalesce(correct_name, species)) %>%  #jumps to second if first in NA, keep first if it is not NA
   select(-correct_name) %>% 
+  #remove species == NA - various calluna elements (seedlings, rootshoot etc)
+  filter(species != "NA") %>% 
   mutate(plot = if_else(site == 'BUO' & year == '2016', #BUO had wrong plot numbers in 2016. Fix that
                         true = recode(plot,   
                                       '10.1.' = '11.1.',
@@ -106,8 +115,23 @@ comm = comm0 %>%
     site == 'NOV' & plot == '20.9.' &  species == 'Carex_sp' & year %in% c('2016', '2018') ~ 'Carex_pilulifera',
     site == 'NOV' & plot == '20.9.' &  species == 'Rhytidiadelphus_loreus' & year == '2018' ~ 'Rhytidiadelphus_squarrosus',
     TRUE ~ species )) %>% 
-  mutate(experiment = tolower(experiment)) %>% #fix case error
-  filter(experiment == "resilience") %>% 
+  ## fix NA group identified by drawings on field-sheet
+  mutate(
+    species = case_when(
+      site == "YST" & species == "Unknown" & group == "NA" & cover == 10 ~ "Moss_sp",
+      site == "YST" & species == "Unknown" & group == "NA" & cover == 1 ~ "Unknown_herb",
+      TRUE ~ species
+    ),
+    group = case_when(
+      site == "YST" & species == "Unknown" & group == "NA" & cover == 10 ~ "Bryophyte",
+      site == "YST" & species == "Unknown" & group == "NA" & cover == 1 ~ "Forb",
+      TRUE ~ species
+    )
+    
+  ) %>% 
+  #combine any species that need merging
   group_by(site, plot, year, species, group) %>% 
-  summarise(cover = sum(cover, na.rm = TRUE)) 
+  summarise(cover = sum(cover, na.rm = TRUE)) %>% 
+  #remove taxa with unknown group (1% cover)
+  filter(group != "NA")
 )
