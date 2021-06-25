@@ -125,7 +125,7 @@ comm = comm0 %>%
     group = case_when(
       site == "YST" & species == "Unknown" & group == "NA" & cover == 10 ~ "Bryophyte",
       site == "YST" & species == "Unknown" & group == "NA" & cover == 1 ~ "Forb",
-      TRUE ~ species
+      TRUE ~ group
     )
     
   ) %>% 
