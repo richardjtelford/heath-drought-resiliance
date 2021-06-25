@@ -22,7 +22,7 @@ weather_plan <- drake_plan(
       filter(variable == "Air_temp") %>% 
       ggplot(aes(x = Datetime, y = value, colour = code)) +
       geom_hline(yintercept = 0, linetype = "dashed", colour = "grey40") +
-      labs(y = "Relative Humidity %", colour = "Site") 
+      labs(y = "Temperature °C", colour = "Site") 
       
       
     RH_plot / temp_plot + patchwork::plot_layout(guides = "collect") &
@@ -62,10 +62,14 @@ weather_plan <- drake_plan(
     ggplot(aes(x = mean_RH, fill = code)) +
     geom_bar(width = 1, show.legend = FALSE) +
     #geom_vline(data = climate %>% filter(year == 2014), mapping = aes(xintercept = mean_RH), colour = "red") +
-    geom_bar(data = climate %>% filter(year == 2014), width = 1, fill = "black") +
+    geom_bar(data = climate %>% filter(year == 2014), fill = "black") +
+    geom_segment(data = climate %>% filter(year == 2014),
+                 mapping = aes(x = mean_RH, xend = mean_RH, y = 3, yend  = 1.5), 
+                 width = 1, colour = "black", arrow = arrow(length = unit(1.5, "mm"))) +
     scale_fill_brewer(palette = "Dark2") +
     geom_text(data = climate %>% filter(month == "January") %>% slice(1), aes(label = range), x = 55, y = 6, size = 2.7) +
     facet_grid(code ~ month) +
+    theme(strip.text.y = element_text(angle = 0)) +
     labs(x = "Mean relative humidity %", y = "Number of years")
   
 )
