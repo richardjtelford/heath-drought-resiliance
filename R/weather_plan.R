@@ -33,43 +33,86 @@ weather_plan <- drake_plan(
   },
   
   climate = {
-    climate_excel <-read_excel("data/Mean RH_jan_feb.xlsx")
-    climate <- map(1 + 0:6 * 3, ~select(climate_excel, .x:(.x + 2))) %>% 
-      map_df(set_names, c("station", "date", "mean_RH")) %>% 
-      filter(!is.na(station)) %>% 
-      separate(date, into = c("month", "year"), sep = "\\.") %>% 
-      mutate(
-        across(c(month, year), as.numeric),
-        month = recode(month, `1` = "January", `2` = "February"),
-        month = factor(month, levels = c("January", "February")),
-        code = recode(station, 
-                      "Hitra - Sandstad Ii" = "d",   
-                      "Rørvik Lufthavn" = "e",       
-                      "Slåtterøy Fyr" = "a",         
-                      "Svinøy Fyr" = "c",            
-                      "Tjøtta" = "g",                 
-                      "Vega - Vallsjø" = "f",         
-                      "Ytterøyane Fyr" = "b"),
-        code = factor(code, levels = letters[7:1])
-      ) %>% 
-    group_by(station) %>% 
-    mutate(range = paste(min(year), "-", max(year)))
-        
+    climate_file <- "data/Nedbør.xlsx"
+    sheets <- excel_sheets(climate_file)[-1]
+    climate <- sheets %>% 
+      set_names(c("Precipitation", "Temperature", "RH" )) %>% 
+      map_dfr(~ {
+        message("variable ", .x)
+        climate_excel <-read_excel(climate_file, sheet = .x, skip = 1, na = c("", "-"))
+     
+        map(1 + 0:6 * 3, ~select(climate_excel, .x:(.x + 2))) %>% 
+          map_df(set_names, c("station", "date", "value")) %>% 
+          filter(!is.na(station)) %>% 
+          separate(date, into = c("month", "year"), sep = "\\.") %>% 
+          filter(month %in% c("01", "02")) %>% 
+          mutate(
+            year = as.numeric(year),
+            month = recode(month, `01` = "January", `02` = "February"),
+            month = factor(month, levels = c("January", "February")),
+            code = recode(station, 
+                          "Hitra - Sandstad Ii" = "d",
+                          "Smøla - Moldstad" = "d",
+                          "Rørvik Lufthavn" = "e", 
+                          "Otterøy" = "e",
+                          "Slåtterøy Fyr" = "a",
+                          "Ytre Solund" = "a",
+                          "Svinøy Fyr" = "c", 
+                          "Fiskåbygd" = "c",
+                          "Tjøtta" = "g",                 
+                          "Vega - Vallsjø" = "f",         
+                          "Ytterøyane Fyr" = "b",
+                          "Hildre" = "b"),
+            code = factor(code, levels = letters[7:1])
+          ) %>% 
+        group_by(code) %>% 
+        mutate(range = paste(min(year), "-", max(year)))
+    }, .id = "variable")    
     climate
-  },
+  },#end climate
+
+ climate_plot = {
+   plot_climate <- function(data, binwidth = 1, xlab = "") {
+     ggplot(data = data, aes(x = value, fill = code)) +
+       geom_histogram( show.legend = FALSE, binwidth = binwidth, boundary = 0) +
+       geom_segment(data = data %>% filter(year == 2014),
+                    mapping = aes(x = value, xend = value, y = 4, yend  = 0),
+                    colour = "black", arrow = arrow(length = unit(1.5, "mm"))) +
+       scale_fill_brewer(palette = "Dark2") +
+       geom_text(data = data %>% filter(month == "January") %>% slice(1), aes(label = range), x = min(data$value, na.rm = TRUE), y = 9, size = 2.7, hjust = 0.05) +
+       facet_grid(code ~ variable, scales = "free_x") +
+       theme(strip.text.y = element_text(angle = 0)) +
+       labs(x = xlab, y = "Number of years")
+   }
+   
+   P_plot <- climate %>% 
+   filter(month == "January", variable == "Precipitation") %>% 
+     plot_climate(binwidth = 10, xlab = "Precipitation mm") +
+     theme(strip.background.y = element_blank(),
+           strip.text.y = element_blank(),
+           plot.margin = margin(5.5, 2, 5.5, 5.5, "pt")
+     )
   
-  climate_plot = climate %>% 
-    ggplot(aes(x = mean_RH, fill = code)) +
-    geom_bar(width = 1, show.legend = FALSE) +
-    #geom_vline(data = climate %>% filter(year == 2014), mapping = aes(xintercept = mean_RH), colour = "red") +
-    geom_bar(data = climate %>% filter(year == 2014), fill = "black") +
-    geom_segment(data = climate %>% filter(year == 2014),
-                 mapping = aes(x = mean_RH, xend = mean_RH, y = 3, yend  = 1.5), 
-                 width = 1, colour = "black", arrow = arrow(length = unit(1.5, "mm"))) +
-    scale_fill_brewer(palette = "Dark2") +
-    geom_text(data = climate %>% filter(month == "January") %>% slice(1), aes(label = range), x = 55, y = 6, size = 2.7) +
-    facet_grid(code ~ month) +
-    theme(strip.text.y = element_text(angle = 0)) +
-    labs(x = "Mean relative humidity %", y = "Number of years")
-  
-)
+   T_plot <- climate %>% 
+     filter(month == "January", variable == "Temperature") %>% 
+     plot_climate(binwidth = 0.4, xlab = "Temperature °C") +
+     theme(axis.title.y = element_blank(),
+       strip.background.y = element_blank(),
+       strip.text.y = element_blank(), 
+       axis.text.y = element_blank(), 
+       axis.ticks.y = element_blank(),
+       plot.margin = margin(5.5, 2, 5.5, 2, "pt")
+     )
+   
+   RH_plot <- climate %>% 
+     filter(month == "January", variable == "RH") %>%
+     mutate(variable = "Relative Humidity") %>% 
+     plot_climate(binwidth = 1, xlab = "Relative Humidity %") +
+     theme(axis.title.y = element_blank(), 
+           axis.text.y = element_blank(), 
+           axis.ticks.y = element_blank(),
+           plot.margin = margin(5.5, 5.5, 5.5, 2, "pt")
+           )
+ 
+   P_plot + T_plot + RH_plot & ylim(0, 11)
+})
