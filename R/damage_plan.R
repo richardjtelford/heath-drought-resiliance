@@ -16,29 +16,24 @@ damage_plan <- drake_plan(
     mutate(vitality = factor(vitality, levels = c("prop_dead", "prop_damaged", "prop_healthy"))),
  
   dead_damage_lat_plot = damage_model_data %>% 
-    {ggplot(., aes(x = Latitude, y = value, colour = code, shape = vitality)) + 
+    {ggplot(., aes(x = Latitude, y = value, colour = code)) + 
         geom_point(show.legend = FALSE, position = position_dodge(width = 0.06)) +
         geom_label_repel(
           aes(x = Latitude, y = 0, colour = code, label = code),
-          data = distinct(., code, Latitude),
+          data = filter(., vitality == "prop_healthy") %>% 
+            distinct(code, Latitude, vitality),
           direction = "x",
           nudge_y = -0.02,
           show.legend = FALSE,
           inherit.aes = FALSE
         ) +
         scale_colour_brewer(palette = "Dark2") +
-        scale_shape_manual(
-          limits = c("prop_dead", "prop_damaged", "prop_healthy"),
-          values = c(4, 1, 16)) +
-        new_scale_color() +
         geom_smooth(
-          aes(colour = vitality, group = vitality, linetype = vitality), 
-          se = FALSE, show.legend = FALSE) +
-        scale_colour_brewer(limits = c("prop_dead", "prop_damaged", "prop_healthy"), palette = "Set1") +
-        scale_linetype_manual(
-          values = c("dotted", "dashed", "solid")) +
+          aes(group = vitality), 
+          se = FALSE, show.legend = FALSE, colour = "black") +
         ylim(0, 1) + 
-        labs(x = "Latitude °N", y = expression(Proportion~ italic(Calluna)~"dead, damaged or healthy"))
+        labs(x = "Latitude °N", y = expression(Proportion~ italic(Calluna)~"dead, damaged or healthy")) +
+        facet_wrap(~ vitality, labeller = labeller(vitality = c("prop_dead" = "Dead", "prop_damaged" = "Damaged", "prop_healthy" = "Healthy")), ncol = 1)
   },  
   
 
@@ -47,6 +42,7 @@ damage_plan <- drake_plan(
     geom_point(data = select(damage_model_data, -code), colour = "grey70") +
     geom_point(show.legend = FALSE) +
     facet_grid(code ~ vitality, labeller = labeller(vitality = c("prop_dead" = "Dead", "prop_damaged" = "Damaged", "prop_healthy" = "Healthy"))) +
+    theme(strip.text.y = element_text(angle = 0)) +
     scale_y_continuous(breaks = c(0, 0.5, 1)) +
     labs(x = "Mean peat depth cm", y = expression(Proportion~italic(Calluna))) +
     scale_colour_brewer(palette = "Dark2"),
