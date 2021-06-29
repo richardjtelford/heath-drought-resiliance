@@ -19,15 +19,24 @@ ordination_plan = drake_plan(
     filter(Score == "sites") %>% 
     bind_cols(comm_fat %>% select(code, plot, year, treatment)),
   
-  nmds_plot = ggplot(comm_fort, aes(x = NMDS1, y = NMDS2, colour = code)) +
-    geom_point(aes(size = year == min(year))) + 
-    geom_path(aes(group = plot)) +
+  nmds_plot = {
+    site_means <- comm_fort %>%
+      group_by(treatment, code, year) %>% 
+      summarise(NMDS1 = mean(NMDS1), NMDS2 = mean(NMDS2), .groups = "drop")
+    
+    ggplot(comm_fort, aes(x = NMDS1, y = NMDS2, colour = code)) +
+   #  geom_point(aes(size = year == min(year)), alpha = 0.2) + 
+   # geom_path(aes(group = plot), alpha = 0.2) +
+    geom_point(aes(size = year == min(year)), # , shape = treatment 
+               data = site_means) + 
+    geom_path(data = site_means, aes(linetype = treatment)) +
     scale_size_discrete(range = c(1, 2)) +
-    scale_colour_brewer(palette = "Dark2") +
+    site_colours +
     scale_y_continuous(breaks = c(-1, 0, 1)) +
     labs(colour = "Site", size = "First year") +
-    coord_equal() +
-    facet_wrap(~ treatment),
+    coord_equal() #+
+#  facet_wrap(~ treatment)
+    },
   
   # species in nmds plot
   
@@ -55,20 +64,69 @@ ordination_plan = drake_plan(
   
   PCA_fort = fortify(PCA) %>% 
     filter(Score == "sites") %>% 
-    bind_cols(comm_fat %>% select(code, plot, year, treatment)),
+    bind_cols(comm_fat %>% select(code, plot, year, treatment)) %>% 
+    mutate(year2 = factor(year == min(year), levels = c("TRUE", "FALSE"))),
   
-  PCA_plot = ggplot(PCA_fort, aes(x = PC1, y = PC2, colour = code)) +
-    geom_point(aes(size = factor(year == min(year), levels = c("TRUE", "FALSE")))) + 
+  pca_plot = ggplot(PCA_fort,
+                    aes(x = PC1, 
+                        y = PC2,
+                        colour = code)) +
+    geom_point(aes(size = year2)) + 
     geom_path(aes(group = plot)) +
     scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
-    scale_colour_brewer(palette = "Dark2") +
+    site_colours +
     scale_y_continuous(breaks = c(-1, 0, 1)) +
     labs(colour = "Site", size = "Year") +
     coord_equal() +
     facet_wrap(~ treatment), 
   
+pca_plot_b = {
+  site_means <- PCA_fort %>%
+    group_by(treatment, code, year, year2) %>% 
+    summarise(PC1 = mean(PC1), PC2 = mean(PC2), .groups = "drop") 
+   
   
-  PCA13_plot = PCA_plot + aes(x = PC1, y = PC3), 
+  ggplot(PCA_fort,
+         aes(x = PC1, 
+             y = PC2,
+             colour = code)) +
+    geom_point(aes(size = year2), alpha = 0.15) + 
+    geom_path(aes(group = plot), alpha = 0.15) +
+    geom_point(aes(size = year2), data = site_means) + 
+    geom_path(data = site_means) +
+    scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
+    site_colours +
+    scale_y_continuous(breaks = c(-1, 0, 1)) +
+    labs(colour = "Site", size = "Year") +
+    coord_equal() +
+    facet_wrap(~ treatment)
+},
+
+pca_plot_c = {
+  site_means <- PCA_fort %>%
+    group_by(treatment, code, year, year2) %>% 
+    summarise(PC1 = mean(PC1), PC2 = mean(PC2), .groups = "drop") 
+  
+  
+  ggplot(PCA_fort,
+         aes(x = PC1, 
+             y = PC2,
+             colour = code, 
+             linetype = treatment)) +
+#    geom_point(aes(size = year2), alpha = 0.2) + 
+#    geom_path(aes(group = plot), alpha = 0.2) +
+    geom_point(aes(size = year2), data = site_means) + 
+    geom_path(data = site_means) +
+    scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
+    site_colours +
+    scale_y_continuous(breaks = c(-1, 0, 1)) +
+    labs(colour = "Site", size = "Year") +
+    coord_equal()# +
+ #   facet_wrap(~ treatment)
+},
+
+  
+  PCA13_plot = pca_plot + aes(x = PC1, y = PC3), 
   
   PCA_species_plot = fortify(PCA) %>% 
     filter(Score == "species") %>% 
@@ -77,6 +135,6 @@ ordination_plan = drake_plan(
     ggplot(aes(x = PC1, y = PC2, label = name_species, colour = group)) +
     geom_point(shape = "+", size = 2) +
     scale_colour_brewer(palette = "Dark2") +
-    geom_text_repel(show.legend = FALSE), 
+    geom_text_repel(show.legend = FALSE)
   
 )
