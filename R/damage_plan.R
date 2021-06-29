@@ -27,7 +27,7 @@ damage_plan <- drake_plan(
           show.legend = FALSE,
           inherit.aes = FALSE
         ) +
-        scale_colour_brewer(palette = "Dark2") +
+        site_colours +
         geom_smooth(
           aes(group = vitality), 
           se = FALSE, show.legend = FALSE, colour = "black") +
@@ -45,7 +45,7 @@ damage_plan <- drake_plan(
     theme(strip.text.y = element_text(angle = 0)) +
     scale_y_continuous(breaks = c(0, 0.5, 1)) +
     labs(x = "Mean peat depth cm", y = expression(Proportion~italic(Calluna))) +
-    scale_colour_brewer(palette = "Dark2"),
+    site_colours,
   
   dead_north_plot = dead_depth_plot +
     aes(x = north) +

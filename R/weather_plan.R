@@ -27,7 +27,7 @@ weather_plan <- drake_plan(
       
     RH_plot / temp_plot + patchwork::plot_layout(guides = "collect") &
       geom_line() &
-      scale_colour_brewer(palette = "Dark2") &
+      site_colours &
       theme(axis.title.x = element_blank()) 
       
   },
@@ -78,7 +78,7 @@ weather_plan <- drake_plan(
        geom_segment(data = data %>% filter(year == 2014),
                     mapping = aes(x = value, xend = value, y = 4, yend  = 0),
                     colour = "black", arrow = arrow(length = unit(1.5, "mm"))) +
-       scale_fill_brewer(palette = "Dark2") +
+       site_fill +
        geom_text(data = data %>% filter(month == "January") %>% slice(1), aes(label = range), x = min(data$value, na.rm = TRUE), y = 9, size = 2.7, hjust = 0.05) +
        facet_grid(code ~ variable, scales = "free_x") +
        theme(strip.text.y = element_text(angle = 0)) +

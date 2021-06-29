@@ -1,4 +1,12 @@
 figures_plan <- drake_plan(
+  
+  #default site colours
+  # site_colours = scale_colour_brewer(palette = "Dark2"),
+  # site_fill = scale_fill_brewer(palette = "Dark2"),
+  site_colours = scale_colour_viridis_d(option = "B", end = 0.9),
+  site_fill = scale_fill_viridis_d(option = "B", end = 0.9),
+  
+  
   # map
   map  = { 
     mp = map_data("worldHires", xlim = c(0, 40), ylim = c(55, 75))
@@ -56,7 +64,7 @@ figures_plan <- drake_plan(
     facet_grid(code ~ .) +
     labs(x = "Year", y = "Number of Calluna seedlings") +
     scale_y_continuous(limits = c(0, NA)) +
-    scale_fill_brewer(palette = "Dark2") +
+    site_fill +
     theme(strip.text.y = element_text(angle = 0)) 
   
   
