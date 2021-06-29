@@ -22,20 +22,23 @@ figures_plan <- drake_plan(
                     labels = c("Dead", "Damaged", "Healthy")), 
       value = as.numeric(value)) %>% 
     group_by(code, year, name, treatment) %>% 
-    summarise(value = mean(value, na.rm = TRUE)) %>% 
+    summarise(value = mean(value, na.rm = TRUE), .groups = "drop") %>% 
     ggplot(aes(x = factor(year), y = value, fill = name)) + 
     geom_col() + 
-    scale_fill_brewer(palette = "Set1") + 
+    scale_fill_manual(values = c("grey30", "grey70", "#4DAF4A")) + 
+    scale_y_continuous(breaks = scales::extended_breaks(n = 4)) +
     labs(x = "Year", y = "Cover %", fill = "Calluna status") +
     facet_grid(code ~ treatment) +
-    theme(strip.text.y = element_text(angle = 0)),
+    theme(strip.text.y = element_text(angle = 0), 
+          legend.position = "bottom"),
   
   #community cover
   community_group_cover = comm %>% 
     inner_join(meta0, by = c("site", "plot")) %>% 
     left_join(site_data, by = c("site" = "Site")) %>% 
+    mutate(group = recode(group, "Fern" = "Fern and Forb", "Forb" = "Fern and Forb")) %>% 
     group_by(code, treatment, year, group) %>% 
-    summarise(cover = mean(cover)) %>%
+    summarise(cover = mean(cover), .groups = "drop") %>%
     ggplot(aes(x = year, y = cover, fill = group)) +
     geom_col() + 
     scale_fill_brewer(palette = "Dark2") +
