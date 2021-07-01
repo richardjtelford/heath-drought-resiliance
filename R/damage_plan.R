@@ -13,15 +13,20 @@ damage_plan <- drake_plan(
            ) %>% 
     select(-ends_with("korr"), -ends_with("org"), -matches("\\d$")) %>% 
     pivot_longer(starts_with("prop"), names_to = "vitality", values_to = "value") %>% 
-    mutate(vitality = factor(vitality, levels = c("prop_dead", "prop_damaged", "prop_healthy"))),
+    mutate(vitality = factor(vitality, levels = c("prop_dead", "prop_damaged", "prop_healthy"))) %>% 
+    full_join(climate %>% 
+                filter(variable == "RH", 
+                       year == 2014, 
+                       month == "January") %>% 
+                select(code, RH = value), by = "code"),
  
   dead_damage_lat_plot = damage_model_data %>% 
-    {ggplot(., aes(x = Latitude, y = value, colour = code)) + 
+    {ggplot(., aes(x = RH, y = value, colour = code)) + 
         geom_point(show.legend = FALSE, position = position_dodge(width = 0.06)) +
         geom_label_repel(
-          aes(x = Latitude, y = 0, colour = code, label = code),
+          aes(x = RH, y = 0, colour = code, label = code),
           data = filter(., vitality == "prop_healthy") %>% 
-            distinct(code, Latitude, vitality),
+            distinct(code, RH, vitality),
           direction = "x",
           nudge_y = -0.02,
           show.legend = FALSE,
@@ -32,7 +37,8 @@ damage_plan <- drake_plan(
           aes(group = vitality), 
           se = FALSE, show.legend = FALSE, colour = "black") +
         ylim(0, 1) + 
-        labs(x = "Latitude °N", y = expression(Proportion~ italic(Calluna)~"dead, damaged or healthy")) +
+        labs(x = "Relative Humidity %", 
+             y = expression(Proportion~italic(Calluna)~"dead, damaged or healthy")) +
         facet_wrap(~ vitality, labeller = labeller(vitality = c("prop_dead" = "Dead", "prop_damaged" = "Damaged", "prop_healthy" = "Healthy")), ncol = 1)
   },  
   
