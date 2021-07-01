@@ -44,7 +44,10 @@ figures_plan <- drake_plan(
   community_group_cover = comm %>% 
     inner_join(meta0, by = c("site", "plot")) %>% 
     left_join(site_data, by = c("site" = "Site")) %>% 
-    mutate(group = recode(group, "Fern" = "Fern and Forb", "Forb" = "Fern and Forb")) %>% 
+    mutate(
+      group = recode(group, "Fern" = "Fern and Forb", "Forb" = "Fern and Forb"),
+      group = factor(group, levels = c("Ericales", "Wood", "Graminoid", "Fern and Forb", "Bryophyte", "Lichen"))
+      ) %>% 
     group_by(code, treatment, year, group) %>% 
     summarise(cover = mean(cover), .groups = "drop") %>%
     ggplot(aes(x = year, y = cover, fill = group)) +
