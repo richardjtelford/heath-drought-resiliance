@@ -42,8 +42,8 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 
-#drake cache
-.drake/
+# targets cache
+_targets/
 
 #data
 data/

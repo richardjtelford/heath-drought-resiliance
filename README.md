@@ -25,6 +25,6 @@ The code will automatically download the data.
 
 ## Running the analysis
 
-This analysis uses the `drake` package to run the analyses.
+This analysis uses the `targets` package to run the analyses.
 
-Source file `make_landpress_resilience.R` to run the analyses.
+Source file `_targets.R` to run the analyses.
