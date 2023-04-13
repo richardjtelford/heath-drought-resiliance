@@ -237,6 +237,10 @@ list(
    name = pca_plots,
    command = make_pca_plots(comm_wide, spp_names, spp_summ, site_colours)
  ),
+ tar_target(
+   name = ca_plots,
+   command = make_ca_plots(comm_wide, spp_names, spp_summ, site_colours)
+ ),
 
  # manuscript
  tar_target(

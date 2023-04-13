@@ -19,6 +19,9 @@ library(tidyverse)
 library(vegan)
 library(patchwork)
 
+# force dependency on bibliography
+tar_read(biblio2)
+
 # set default theme
 theme_set(theme_bw()+ 
             theme(panel.grid = element_blank()))
@@ -70,6 +73,8 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 
 ## Results
 
+pca
+
 ```{r}
 #| label: dca
 
@@ -117,6 +122,38 @@ screeplot(pca_plots$PCA)
 pca_plots$PCA_species_plot
 ```
 
+
+ca
+
+```{r}
+#| label: fig-ca-plot
+#| fig-cap: CA of square root transformed cover
+tar_load(ca_plots)
+ca_plots$ca_plot
+```
+
+```{r}
+#| label: fig-ca-plot-b
+#| fig-cap: CA of square root transformed cover v2
+ca_plots$ca_plot_b
+```
+```{r}
+#| label: fig-ca-plot-c
+#| fig-cap: CA of square root transformed cover v3
+ca_plots$ca_plot_c
+```
+
+
+
+
+
+```{r}
+#| label: fig-species_CA_plot
+#| fig-cap: Badly behaved species
+ca_plots$ca_species_plot
+```
+
+nmds
 
 ```{r}
 #| label: fig-nmds-plot

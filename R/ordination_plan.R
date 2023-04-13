@@ -10,6 +10,7 @@ make_wide_comm <- function(comm, meta0, site_data) {
     filter(!is.na(site)) |>
     filter(!(site == "BER" & year == "2017" & plot == "11.")) |>
     select(-group) |>
+    filter(n() > 2, .by = species) |> 
     pivot_wider(names_from = "species", values_from = "cover", values_fill = 0) |>
     arrange(year)
 }
@@ -192,5 +193,115 @@ make_pca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
     pca_plot_c = pca_plot_c,
     PCA13_plot = PCA13_plot,
     PCA_species_plot = PCA_species_plot
+  )
+}
+
+#### make CA ####
+
+make_ca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
+  
+  CA <- comm_wide |>
+    select(-(site:code)) |>
+    sqrt() |>
+    cca()
+  
+  CA_fort <- fortify(CA) |>
+    filter(Score == "sites") |>
+    bind_cols(comm_wide |> select(code, plot, year, treatment)) |>
+    mutate(year2 = factor(year == min(year), levels = c("TRUE", "FALSE")))
+  
+  ca_plot <- ggplot(
+    CA_fort,
+    aes(
+      x = CA1,
+      y = CA2,
+      colour = code
+    )
+  ) +
+    geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
+    geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
+    geom_point(aes(size = year2)) +
+    geom_path(aes(group = plot)) +
+    scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
+    site_colours +
+    scale_y_continuous(breaks = c(-1, 0, 1)) +
+    labs(colour = "Site", size = "Year") +
+    coord_equal() +
+    facet_wrap(~treatment)
+  
+  ca_plot_b <- {
+    site_means <- CA_fort |>
+      group_by(treatment, code, year, year2) |>
+      summarise(CA1 = mean(CA1), CA2 = mean(CA2), .groups = "drop")
+    
+    
+    ggplot(
+      CA_fort,
+      aes(
+        x = CA1,
+        y = CA2,
+        colour = code
+      )
+    ) +
+      geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
+      geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
+      geom_point(aes(size = year2), alpha = 0.15) +
+      geom_path(aes(group = plot), alpha = 0.15) +
+      geom_point(aes(size = year2), data = site_means) +
+      geom_path(data = site_means) +
+      scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
+      site_colours +
+      scale_y_continuous(breaks = c(-1, 0, 1)) +
+      labs(colour = "Site", size = "Year") +
+      coord_equal() +
+      facet_wrap(~treatment)
+  }
+  
+  ca_plot_c <- {
+    site_means <- CA_fort |>
+      group_by(treatment, code, year, year2) |>
+      summarise(CA1 = mean(CA1), CA2 = mean(CA2), .groups = "drop")
+    
+    
+    ggplot(
+      CA_fort,
+      aes(
+        x = CA1,
+        y = CA2,
+        colour = code,
+        linetype = treatment
+      )
+    ) +
+      geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
+      geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
+      #    geom_point(aes(size = year2), alpha = 0.2) +
+      #    geom_path(aes(group = plot), alpha = 0.2) +
+      geom_point(aes(size = year2), data = site_means) +
+      geom_path(data = site_means) +
+      scale_size_discrete(range = c(2, 1), labels = c("2016", "2017-2019")) +
+      site_colours +
+      scale_y_continuous(breaks = c(-1, 0, 1)) +
+      labs(colour = "Site", size = "Year") +
+      coord_equal() # +
+    #   facet_wrap(~ treatment)
+  }
+  
+  ca_species_plot <- fortify(CA) |>
+    filter(Score == "species") |>
+    left_join(distinct(spp_names, correct_name, group), by = c("Label" = "correct_name")) |>
+    left_join(spp_summ, by = c("Label" = "species")) |>
+    ggplot(aes(x = CA1, y = CA2, label = name_species, colour = group)) +
+    geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
+    geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
+    geom_point(shape = "+", size = 2) +
+    scale_colour_brewer(palette = "Dark2") +
+    ggrepel::geom_text_repel(show.legend = FALSE)
+  
+  list(
+    CA = CA,
+    ca_plot = ca_plot,
+    ca_plot_b = ca_plot_b,
+    ca_plot_c = ca_plot_c,
+    ca_species_plot = ca_species_plot
   )
 }
