@@ -8,8 +8,8 @@ make_map <- function(site_data) {
 
   ggplot(mp, aes(x = Longitude, y = Latitude, label = code)) +
     geom_sf(fill = "grey80", colour = "grey70", inherit.aes = FALSE) +
-    ggspatial::geom_spatial_point(data = site_data) +
-    ggspatial::geom_spatial_text_repel(data = site_data, hjust = 1.2, direction = "x", force = 2, point.padding = 0.2) +
+    ggspatial::geom_spatial_point(data = site_data, crs = 4326) +
+    ggspatial::geom_spatial_text_repel(data = site_data, hjust = 1.2, direction = "x", force = 2, point.padding = 0.2, crs = 4326) +
     coord_sf(xlim = c(-350000, 500000), ylim = c(-740000, 680000), expand = FALSE, crs = "+proj=laea +lon_0=10 +lat_0=64.5 +datum=WGS84 +units=m +no_defs") +
     ggspatial::annotation_scale(location = "tl") +
     theme(axis.title = element_blank())
@@ -33,6 +33,8 @@ make_calluna_cover_plot <- function(calluna_cover, site_data) {
     summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
     ggplot(aes(x = factor(year), y = value, fill = name)) +
     geom_col() +
+    geom_vline(aes(xintercept = 1.5, colour = I(colour), linetype = I(linetype)), 
+               data = tibble(treatment = factor("Burnt", levels = c("Unburnt", "Burnt")), colour = c("black", "red"), linetype = c("solid", "dashed"))) +
     scale_fill_manual(values = c("grey30", "grey70", "#4DAF4A")) +
     scale_y_continuous(breaks = scales::extended_breaks(n = 4)) +
     labs(x = "Year", y = "Cover %", fill = "Calluna status") +
@@ -56,6 +58,8 @@ make_community_group_cover_plot <- function(comm, meta0, site_data) {
     summarise(cover = mean(cover), .groups = "drop") |>
     ggplot(aes(x = year, y = cover, fill = group)) +
     geom_col() +
+    geom_vline(aes(xintercept = 1.5, colour = I(colour), linetype = I(linetype)), 
+               data = tibble(treatment = factor("Burnt", levels = c("Unburnt", "Burnt")), colour = c("black", "red"), linetype = c("solid", "dashed"))) +
     scale_fill_brewer(palette = "Dark2") +
     facet_grid(code ~ treatment) +
     labs(x = "Year", y = "Cover %", fill = "Functional Group") +
