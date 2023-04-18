@@ -8,6 +8,7 @@ bibliography: Rmd/TDT2.bib
 csl: Rmd/elsevier-harvard_rjt.csl
 execute: 
   error: true
+  echo: false
 ---
 
 ```{r}
@@ -59,6 +60,8 @@ cover of regenerating _Calluna_ in burnt plots against time and latitude,
 seedling number in burnt plots against latitude,
 Except for seedling number which assumed a negative binomial distribution, all models assumed a Gaussian error distribution.
 
+Ordinations were performed on all taxa with more than two occurrences. 
+For detrended correspondence analysis / principal components analysis / correspondence analysis, taxon abundances were square root transformed.
 
 ### Software
 
@@ -73,7 +76,7 @@ Code to reproduce all the analyses is archived at [https://github.com/richardjte
 
 ## Results
 
-pca
+### decorana
 
 ```{r}
 #| label: dca
@@ -82,7 +85,12 @@ tar_load(pca_plots)
 pca_plots$DCA
 ```
 
+First axis is long - suggests we should be using CA or nmds.
 
+If the burnt and unburnt plot are analysed separately, the length of the first DCA axis is 3.6 and 2.6 respectively.  
+
+
+### pca
 ```{r}
 #| label: fig-pca-plot
 #| fig-cap: PCA of square root transformed cover
@@ -101,14 +109,6 @@ pca_plots$pca_plot_c
 ```
 
 
-
-```{r}
-#| label: fig-pca-plot13
-#| fig-cap: PCA of square root transformed cover, axes 1 & 3
-pca_plots$PCA13_plot
-```
-
-
 ```{r}
 #| label: fig-pca-sceeplot
 #| fig-cap: Screeplot. Broken stick not meaningful with these data - probably because
@@ -122,8 +122,10 @@ screeplot(pca_plots$PCA)
 pca_plots$PCA_species_plot
 ```
 
+I think the pca look so good because they are dominated by changes of total cover in vegetation after burning, and not compositional changes.
+As such the pca is just another way to present the cover bar charts.
 
-ca
+### ca
 
 ```{r}
 #| label: fig-ca-plot
@@ -153,7 +155,10 @@ ca_plots$ca_plot_c
 ca_plots$ca_species_plot
 ```
 
-nmds
+ca are mostly ignoring the changes in total cover, focusing on the relative abundance. 
+They look messy.
+
+### nmds
 
 ```{r}
 #| label: fig-nmds-plot
@@ -168,10 +173,15 @@ nmds_plots$nmds_plot
 nmds_plots$nmds_species_plot
 ```
 
+NMDS also looks messy.
+
+### cover bar plots
+
 ```{r}
 #| label: fig-calluna-cover-plot
 #| fig-cap: Changes of _Calluna_ cover over time by health status. Sites are arranged
 #|   from north-south.
+#|   Red-black line indicates the timing of the burning in the burnt plots.
 #| fig-height: !expr 13/2.54
 #| fig-width: !expr 12/2.54
 tar_read(calluna_cover_plot)
@@ -179,7 +189,9 @@ tar_read(calluna_cover_plot)
 
 ```{r}
 #| label: fig-community-group-plot
-#| fig-cap: Changes of community cover over time by taxonomic group. Sites are arranged from north-south.
+#| fig-cap: Changes of community cover over time by taxonomic group. 
+#|   Sites are arranged from north-south.
+#|   Red-black line indicates the timing of the burning in the burnt plots.
 #| fig-height: !expr 20/2.54
 #| fig-width: !expr 15/2.54
 tar_read(community_group_cover_plot)
