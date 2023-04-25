@@ -10,3 +10,6 @@ targets::tar_make()
 # targets::tar_make_future(workers = 2) # nolint
 
 targets::tar_visnetwork()
+
+
+#targets::tar_renv(extras = c("visNetwork"))
