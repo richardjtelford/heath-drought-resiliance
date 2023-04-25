@@ -38,7 +38,7 @@ make_calluna_cover_plot <- function(calluna_cover, site_data) {
     scale_fill_manual(values = c("grey30", "grey70", "#4DAF4A")) +
     scale_y_continuous(breaks = scales::extended_breaks(n = 4)) +
     labs(x = "Year", y = "Cover %", fill = "Calluna status") +
-    facet_grid(code ~ treatment) +
+    facet_grid(rows = vars(code), cols = vars(treatment)) +
     theme(
       strip.text.y = element_text(angle = 0),
       legend.position = "bottom"
@@ -61,7 +61,7 @@ make_community_group_cover_plot <- function(comm, meta0, site_data) {
     geom_vline(aes(xintercept = 1.5, colour = I(colour), linetype = I(linetype)), 
                data = tibble(treatment = factor("Burnt", levels = c("Unburnt", "Burnt")), colour = c("black", "red"), linetype = c("solid", "dashed"))) +
     scale_fill_brewer(palette = "Dark2") +
-    facet_grid(code ~ treatment) +
+    facet_grid(rows = vars(code), cols = vars(treatment)) +
     labs(x = "Year", y = "Cover %", fill = "Functional Group") +
     theme(strip.text.y = element_text(angle = 0), 
           legend.position = "bottom")

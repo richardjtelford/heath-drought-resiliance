@@ -53,7 +53,7 @@ make_nmds_plots <- function(comm_wide, comm, spp_names, spp_summ, site_colours) 
       scale_y_continuous(breaks = c(-1, 0, 1)) +
       labs(colour = "Site", size = "First year") +
       coord_equal() #+
-    #  facet_wrap(~ treatment)
+    #  facet_wrap(facets = vars(treatment))
   }
 
   # species in nmds plot
@@ -112,7 +112,7 @@ make_pca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
     scale_y_continuous(breaks = c(-1, 0, 1)) +
     labs(colour = "Site", size = "Year") +
     coord_equal() +
-    facet_wrap(~treatment)
+    facet_wrap(facets = vars(treatment))
 
   pca_plot_b <- {
     site_means <- PCA_fort |>
@@ -139,7 +139,7 @@ make_pca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
       scale_y_continuous(breaks = c(-1, 0, 1)) +
       labs(colour = "Site", size = "Year") +
       coord_equal() +
-      facet_wrap(~treatment)
+      facet_wrap(facets = vars(treatment))
   }
 
   pca_plot_c <- {
@@ -168,7 +168,7 @@ make_pca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
       scale_y_continuous(breaks = c(-1, 0, 1)) +
       labs(colour = "Site", size = "Year") +
       coord_equal() # +
-    #   facet_wrap(~ treatment)
+    #   facet_wrap(facets = vars(treatment))
   }
 
 
@@ -227,7 +227,7 @@ make_ca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
     scale_y_continuous(breaks = c(-1, 0, 1)) +
     labs(colour = "Site", size = "Year") +
     coord_equal() +
-    facet_wrap(~treatment)
+    facet_wrap(facets = vars(treatment))
   
   ca_plot_b <- {
     site_means <- CA_fort |>
@@ -254,7 +254,7 @@ make_ca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
       scale_y_continuous(breaks = c(-1, 0, 1)) +
       labs(colour = "Site", size = "Year") +
       coord_equal() +
-      facet_wrap(~treatment)
+      facet_wrap(facets = vars(treatment))
   }
   
   ca_plot_c <- {
@@ -283,7 +283,7 @@ make_ca_plots <- function(comm_wide, spp_names, spp_summ, site_colours) {
       scale_y_continuous(breaks = c(-1, 0, 1)) +
       labs(colour = "Site", size = "Year") +
       coord_equal() # +
-    #   facet_wrap(~ treatment)
+    # facet_wrap(facets = vars(treatment))
   }
   
   ca_species_plot <- fortify(CA) |>

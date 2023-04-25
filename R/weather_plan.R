@@ -73,7 +73,7 @@ load_climate <- function(climate_data) {
 } # end climate
 
 make_climate_plot <- function(climate, site_fill) {
-  plot_climate <- function(data, binwidth = 1, xlab = "") {
+  plot_climate <- function(data, binwidth = 1, xlab = "", ylim) {
     ggplot(data = data, aes(x = value, fill = code)) +
       geom_histogram(show.legend = FALSE, binwidth = binwidth, boundary = 0) +
       geom_segment(
@@ -82,15 +82,19 @@ make_climate_plot <- function(climate, site_fill) {
         colour = "black", arrow = arrow(length = unit(1.5, "mm"))
       ) +
       site_fill +
-      geom_text(data = data |> filter(month == "January") |> slice(1), aes(label = range), x = min(data$value, na.rm = TRUE), y = 9, size = 2.7, hjust = 0.05) +
-      facet_grid(code ~ variable, scales = "free_x") +
+      geom_text(data = data |> slice(1, .by = code), aes(label = range), 
+                x = min(data$value, na.rm = TRUE),
+                y = 9, size = 2.7, hjust = 0.05) +
+      facet_grid(rows = vars(code), cols = vars(variable), scales = "free_x") +
+      scale_y_continuous(breaks = c(0, 5, 10), limits = ylim) +
       theme(strip.text.y = element_text(angle = 0)) +
-      labs(x = xlab, y = "Number of years")
+      labs(x = xlab, y = "Number of years") 
   }
-
+  
+  ylim <- c(0, 11)
   P_plot <- climate |>
     filter(month == "January", variable == "Precipitation") |>
-    plot_climate(binwidth = 10, xlab = "Precipitation mm") +
+    plot_climate(binwidth = 10, xlab = "Precipitation mm", ylim = ylim) +
     theme(
       strip.background.y = element_blank(),
       strip.text.y = element_blank(),
@@ -99,7 +103,7 @@ make_climate_plot <- function(climate, site_fill) {
 
   T_plot <- climate |>
     filter(month == "January", variable == "Temperature") |>
-    plot_climate(binwidth = 0.4, xlab = "Temperature °C") +
+    plot_climate(binwidth = 0.4, xlab = "Temperature °C", ylim = ylim) +
     theme(
       axis.title.y = element_blank(),
       strip.background.y = element_blank(),
@@ -112,7 +116,7 @@ make_climate_plot <- function(climate, site_fill) {
   RH_plot <- climate |>
     filter(month == "January", variable == "RH") |>
     mutate(variable = "Relative Humidity") |>
-    plot_climate(binwidth = 1, xlab = "Relative Humidity %") +
+    plot_climate(binwidth = 1, xlab = "Relative Humidity %", ylim = ylim) +
     theme(
       axis.title.y = element_blank(),
       axis.text.y = element_blank(),
@@ -120,5 +124,5 @@ make_climate_plot <- function(climate, site_fill) {
       plot.margin = margin(5.5, 5.5, 5.5, 2, "pt")
     )
 
-  P_plot + T_plot + RH_plot & ylim(0, 11)
+  P_plot + T_plot + RH_plot
 }
