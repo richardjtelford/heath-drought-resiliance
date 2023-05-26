@@ -54,6 +54,8 @@ make_community_group_cover_plot <- function(comm, meta0, site_data) {
       group = recode(group, "Fern" = "Fern and Forb", "Forb" = "Fern and Forb", "Wood" = "Woody"),
       group = factor(group, levels = c("Ericales", "Woody", "Graminoid", "Fern and Forb", "Bryophyte", "Lichen"))
     ) |>
+    group_by(code, treatment, year, group, plot) |> 
+    summarise(cover = sum(cover), .groups = "drop") |> 
     group_by(code, treatment, year, group) |>
     summarise(cover = mean(cover), .groups = "drop") |>
     ggplot(aes(x = year, y = cover, fill = group)) +
@@ -63,8 +65,7 @@ make_community_group_cover_plot <- function(comm, meta0, site_data) {
     scale_fill_brewer(palette = "Dark2") +
     facet_grid(rows = vars(code), cols = vars(treatment)) +
     labs(x = "Year", y = "Cover %", fill = "Functional Group") +
-    theme(strip.text.y = element_text(angle = 0), 
-          legend.position = "bottom")
+    theme(strip.text.y = element_text(angle = 0))
 }
 
 # seedling plot
