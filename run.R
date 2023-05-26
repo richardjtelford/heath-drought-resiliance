@@ -12,4 +12,4 @@ targets::tar_make()
 targets::tar_visnetwork()
 
 
-#targets::tar_renv(extras = c("visNetwork"))
+# targets::tar_renv(extras = c("rnaturalearthhires", "visNetwork"))
