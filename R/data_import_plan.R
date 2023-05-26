@@ -36,7 +36,8 @@ load_community <- function(community_download) {
   )
 }
 
-load_spp_names <- function(community_download){ read_xlsx(community_download, sheet = "corr_names") |>
+load_spp_names <- function(community_download){ 
+  read_xlsx(community_download, sheet = "corr_names") |>
   filter(!(is.na(correct_name))) |>
   distinct(species, .keep_all = TRUE) |> # Remove duplicates
   mutate(
