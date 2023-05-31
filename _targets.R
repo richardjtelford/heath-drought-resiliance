@@ -9,18 +9,11 @@ library(tarchetypes) # Load other packages as needed.
 
 # Set target options:
 tar_option_set(
-  packages = c("tidyverse", "readxl", "dataDownloader", "patchwork", "rjt.misc", "vegan", "ggvegan", "pipebind"), # packages that your targets need to run
+  packages = c("tidyverse", "readxl", "dataDownloader", "patchwork", "rjt.misc", "vegan", "ggvegan", "pipebind", "lme4"), # packages that your targets need to run
   format = "rds" # default storage format
   # Set other options as needed.
 )
 
-
-# library("broom")
-# library("nlme")
-# library("ggrepel")
-# library("lubridate")
-# library("lme4")
-# library("lmerTest")
 
 # tar_make_clustermq() configuration (okay to leave alone):
 options(clustermq.scheduler = "multicore")
@@ -219,6 +212,11 @@ list(
    name = seedling_model,
    command = make_seedling_model(seedlings, meta0, site_data)
  ),
+ tar_target(
+   name = calluna_recovery_model,
+   command = make_calluna_models(calluna_cover)
+ ),
+ 
  
  # ordinations
  tar_target(
@@ -241,6 +239,17 @@ list(
    name = ca_plots,
    command = make_ca_plots(comm_wide, spp_names, spp_summ, site_colours)
  ),
+ 
+ # damage by enviroment
+ tar_target(
+   name = damage_model_data,
+   command = make_damage_model_data(calluna_cover, site_data, env0)
+ ),
+ tar_target(
+   name = dead_damaged_plots,
+   command = make_dead_damaged_plots(damage_model_data, site_colours)
+ ),
+   
 
  # manuscript
  tar_target(

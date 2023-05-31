@@ -19,6 +19,7 @@ library(targets)
 library(tidyverse)
 library(vegan)
 library(patchwork)
+library(lmerTest)
 
 # force dependency on bibliography
 tar_read(biblio2)
@@ -206,32 +207,26 @@ tar_read(seedling_plot)
 
 ## Proportion Dead
 
-```{r}
-#| label: fig-dead-damaged-latitude
-#| fig-cap: Proportion _Calluna_ dead,  damaged or healthy in 2016 against relative humidity.
-#|   Lines are loess smoothers.
-tar_read(dead_damage_lat_plot)
-```
-
 
 ```{r}
 #| label: fig-dead-aspect
 #| fig-cap: Proportion _Calluna_ dead, damaged or healthy aspect
-tar_read(dead_north_plot)
+tar_load(dead_damaged_plots)
+dead_damaged_plots$dead_north_plot
 ```
 
 
 ```{r}
 #| label: fig-dead-depth
 #| fig-cap: Proportion _Calluna_ dead, damaged or healthy  against mean peat depth
-tar_read(dead_depth_plot)
+dead_damaged_plots$dead_depth_plot
 ```
 
 
 ```{r}
 #| label: fig-dead-slope
 #| fig-cap: Proportion _Calluna_ dead, damaged or healthy against slope
-tar_read(dead_slope_plot)
+dead_damaged_plots$dead_slope_plot
 ```
 
 
@@ -275,41 +270,31 @@ Mixed effect model with negative binomial distribution, random effect is plot ne
 seedling_model$latitude |> summary()
 ```
 
-### Proportion dead by various predictors
+### Calluna recovery in unburnt plots
 
 ```{r}
 #| echo: true
 # Latitude as a proxy for drought severity
+tar_load(calluna_recovery_model)
 
-summary(tar_read(mod_lat))
+calluna_recovery_model$mod_unburnt_recovery |> 
+  summary()
 
-# RH
-summary(tar_read(mod_RH))
+calluna_recovery_model$mod_unburnt_recovery |> 
+  anova()
 
-# RH and peat depth
-tar_read(mod_RH_depth) |> summary()
-
-# RH and aspect
-tar_read(mod_RH_north) |> summary()
 ```
 
 ### Recovery of Calluna in burnt plots
 
 ```{r}
 #| echo: true
-# year
-summary(tar_read(burnt_year_mod))
 
-# year + latitude
-summary(tar_read(burnt_yearlat_mod))
+calluna_recovery_model$mod_burnt_recovery |> 
+  summary()
 
-# year * latitude (interaction not significant - too complex model)
-summary(tar_read(burnt_yearxlat_mod))
-
-# Year + latitude + depth
-summary(tar_read(burnt_yeardepth_mod))
-# Year + latitude + aspect
-summary(tar_read(burnt_yearnorth_mod))
+calluna_recovery_model$mod_burnt_recovery |> 
+  anova()
 ```
 
 
