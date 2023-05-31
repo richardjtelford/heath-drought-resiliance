@@ -58,7 +58,7 @@ make_community_group_cover_plot <- function(comm, meta0, site_data) {
     summarise(cover = sum(cover), .groups = "drop") |> 
     group_by(code, treatment, year, group) |>
     summarise(cover = mean(cover), .groups = "drop") |>
-    ggplot(aes(x = year, y = cover, fill = group)) +
+    ggplot(aes(x = as.factor(year), y = cover, fill = group)) +
     geom_col() +
     geom_vline(aes(xintercept = 1.5, colour = I(colour), linetype = I(linetype)), 
                data = tibble(treatment = factor("Burnt", levels = c("Unburnt", "Burnt")), colour = c("black", "red"), linetype = c("solid", "dashed"))) +
