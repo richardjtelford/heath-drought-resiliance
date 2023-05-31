@@ -256,14 +256,23 @@ tar_read(climate_plot)
 
 ## Models
 
+### Seedling burnt vs unburnt
+
+```{r}
+tar_load(seedling_model)
+seedling_model$treatment |> summary()
+
+broom.mixed::augment(seedling_model$treatment, newdata = tibble(treatment = c("Burnt", "Unburnt")), re.form = NA) |> 
+  mutate(mean = exp(.fitted)) |> 
+  select(treatment, mean)
+```
+
 ### Seedling abundance against latitude. 
 
 Mixed effect model with negative binomial distribution, random effect is plot nested in site.
-Year is a fixed effect as too few years to use as a random effect. 
-(Model is singular, probably because all values within some groups are zero. )
 
 ```{r}
-tar_read(seedling_model) |> summary()
+seedling_model$latitude |> summary()
 ```
 
 ### Proportion dead by various predictors
