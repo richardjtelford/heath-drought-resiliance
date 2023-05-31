@@ -10,7 +10,9 @@ load_metadata <- function(meta_download) {
         plot == "22.0." ~ "Unburnt",
         plot == "22.9." ~ "Burnt",
         TRUE ~ treatment
-      ),
+      )) |> 
+    filter(treatment %in% c("Burnt", "Unburnt")) |> 
+    mutate(
       treatment = factor(treatment),
       treatment = fct_relevel(treatment, "Unburnt")
     )
@@ -61,8 +63,9 @@ load_calluna_cover <- function(calluna_cover_download){
   mutate(plot = if_else(!str_detect(plot, "\\.$"), true = paste0(plot, "."), false = plot))
 }
 
-load_seedlings <- function(calluna_cover_download){
-  read_xlsx(calluna_cover_download, sheet = "seedling", na = "na")
+load_seedlings <- function(calluna_cover_download, meta0){
+  read_xlsx(calluna_cover_download, sheet = "seedling", na = "na") |> 
+    clean_plot_ids(plot_list = meta0)
 }
 
 load_all_covers <- function(calluna_cover_download){

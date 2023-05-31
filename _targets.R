@@ -138,7 +138,7 @@ list(
  ),
  tar_target(
    name = seedlings,
-   command = load_seedlings(calluna_cover_download)
+   command = load_seedlings(calluna_cover_download, meta0)
  ),
  
   tar_target(
@@ -154,7 +154,7 @@ list(
  # clean data
  tar_target(
    name = comm, 
-   command = clean_comm(comm0, spp_names)
+   command = clean_comm(comm0, spp_names, calluna_cover, meta0)
  ),
  
  # default colour scheme
