@@ -9,7 +9,7 @@ library(tarchetypes) # Load other packages as needed.
 
 # Set target options:
 tar_option_set(
-  packages = c("tidyverse", "readxl", "dataDownloader", "patchwork", "rjt.misc", "vegan", "ggvegan", "pipebind", "lme4"), # packages that your targets need to run
+  packages = c("tidyverse", "readxl", "dataDownloader", "patchwork", "rjt.misc", "vegan", "ggvegan", "pipebind", "lmerTest"), # packages that your targets need to run
   format = "rds" # default storage format
   # Set other options as needed.
 )
@@ -196,7 +196,7 @@ list(
  ),
  tar_target(
    name = calluna_cover_plot,
-   command = make_calluna_cover_plot(calluna_cover, site_data)
+   command = make_calluna_cover_plot(calluna_cover, comm, meta0, site_data)
  ),
  tar_target(
    name = community_group_cover_plot,
@@ -261,7 +261,7 @@ list(
    name = biblio2,
    #add extra packages to bibliography
    command = package_citations(
-     packages = c("vegan", "targets", "tidyverse", "quarto", "renv", "lme4", "lmerTest"), 
+     packages = c("vegan", "targets", "tidyverse", "quarto", "renv", "lmerTest"), 
      old_bib = biblio, 
      new_bib = "Rmd/TDT2.bib"),
    format = "file"
@@ -272,6 +272,12 @@ list(
      name = manuscript,
      path = "methods_results.qmd",
      extra_files = c("Rmd/elsevier-harvard_rjt.csl", "Rmd/TDT2.bib")
+ ),
+  # species list for appendix
+ tar_target(
+   name = species_list,
+   #add extra packages to bibliography
+   command = make_species_list(spp_names, comm, file = "Species_abbreviations.csv"),
+   format = "file"
  )
- 
 )
