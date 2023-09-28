@@ -79,7 +79,7 @@ make_climate_plot <- function(climate, site_fill) {
       geom_segment(
         data = data |> filter(year == 2014),
         mapping = aes(x = value, xend = value, y = 4, yend = 0),
-        colour = "black", arrow = arrow(length = unit(1.5, "mm"))
+        colour = "blue", arrow = arrow(length = unit(1.5, "mm"))
       ) +
       site_fill +
       geom_text(data = data |> slice(1, .by = code), aes(label = range), 
@@ -99,7 +99,9 @@ make_climate_plot <- function(climate, site_fill) {
       strip.background.y = element_blank(),
       strip.text.y = element_blank(),
       plot.margin = margin(5.5, 2, 5.5, 5.5, "pt")
-    )
+    ) +
+    geom_segment(data = tibble(code = factor("G")), aes(x = 350, xend = 350, y = 8, yend = 4), arrow = arrow(length = unit(1.5, "mm")), colour = "blue") +
+    geom_text(data = tibble(code = factor("G")), aes(x = 350, y = 6, label = "2014"), colour = "blue", hjust = 0, nudge_x = 20)
 
   T_plot <- climate |>
     filter(month == "January", variable == "Temperature") |>
@@ -126,3 +128,4 @@ make_climate_plot <- function(climate, site_fill) {
 
   P_plot + T_plot + RH_plot
 }
+
