@@ -57,10 +57,18 @@ load_calluna_cover <- function(calluna_cover_download){
   read_xlsx(calluna_cover_download, sheet = "Ferdigstilling", na = "na") |>
   mutate(
     treatment = recode(treatment, "C" = "Unburnt", "B" = "Burnt"),
+
+  ) |>
+  mutate(
+    plot = if_else(!str_detect(plot, "\\.$"), true = paste0(plot, "."), false = plot),
+    treatment = case_when(
+      plot == "25.5." ~ "Burnt",
+      plot == "25.0." ~ "Unburnt",
+      .default = treatment
+    ), 
     treatment = factor(treatment),
     treatment = fct_relevel(treatment, "Unburnt")
-  ) |>
-  mutate(plot = if_else(!str_detect(plot, "\\.$"), true = paste0(plot, "."), false = plot))
+    )
 }
 
 load_seedlings <- function(calluna_cover_download, meta0){
