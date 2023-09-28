@@ -22,7 +22,11 @@ make_spp_summ <- function(comm){
   filter(cover > 0) |>
   summarise(mx = max(cover), n = n(), .groups = "drop") |>
   filter(mx > 20, n > 15) |>
-  mutate(name_species = str_replace(species, "^([A-Z][a-z]{2}).*_([a-z]{2,3}).*", "\\1_\\2"))
+  mutate(
+    name_species = str_replace(species, "^([A-Z][a-z]{2}).*_([a-z]{2,3}).*", "\\1 \\2"),
+    name_species = str_to_title(name_species),
+    name_species = str_remove(name_species, " ")
+    )
 }
 
 make_nmds_plots <- function(comm_wide, comm, spp_names, spp_summ, site_colours) {
@@ -44,15 +48,20 @@ make_nmds_plots <- function(comm_wide, comm, spp_names, spp_summ, site_colours) 
       # geom_path(aes(group = plot), alpha = 0.2) +
       geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
       geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
-      geom_point(aes(size = year == min(year)), # , shape = treatment
+      geom_point(aes(size = year > min(year)), # , shape = treatment
         data = site_means
       ) +
       geom_path(data = site_means, aes(linetype = treatment)) +
-      scale_size_discrete(range = c(1, 2)) +
+      scale_size_discrete(range = c(2, 1), labels = c("First", "Subsequent")) +
       site_colours +
-      scale_y_continuous(breaks = c(-1, 0, 1)) +
-      labs(colour = "Site", size = "First year") +
-      coord_equal() #+
+      scale_y_continuous(breaks = c(-0.5, 0, 0.5)) +
+      labs(colour = "Site", size = "Year", linetype = "Treatment") +
+      coord_equal() +
+      guides(
+        colour = guide_legend(title.position = "top", byrow = TRUE), 
+        linetype = guide_legend( title.position = "top", ncol = 1), 
+        size = guide_legend(title.position = "top", ncol = 1)) +
+      theme(legend.position = "bottom")
     #  facet_wrap(facets = vars(treatment))
   }
 
@@ -64,12 +73,19 @@ make_nmds_plots <- function(comm_wide, comm, spp_names, spp_summ, site_colours) 
     filter(Score == "species") |>
     left_join(distinct(spp_names, correct_name, group), by = c("Label" = "correct_name")) |>
     left_join(spp_summ, by = c("Label" = "species")) |>
+    mutate(
+      group = recode(group, "Fern" = "Fern and Forb", "Forb" = "Fern and Forb", "Wood" = "Woody"),
+      group = factor(group, levels = c("Ericales", "Woody", "Graminoid", "Fern and Forb", "Bryophyte", "Lichen"))
+    ) |>
     ggplot(aes(x = NMDS1, y = NMDS2, label = name_species, colour = group)) +
     geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.2) + 
     geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.2) +
     geom_point(shape = "+", size = 2) +
-    scale_colour_brewer(palette = "Dark2") +
-    ggrepel::geom_text_repel(show.legend = FALSE)
+    scale_colour_manual(values = c("#d075c7", "#1FAF7F", "#D95F02", "#7570B3", "#66A61E", "#E6AB02")) +
+    ggrepel::geom_text_repel(show.legend = FALSE, size = 3) +
+    labs(colour = "Functional Group") +
+    guides(colour = guide_legend(override.aes = list(size = 3), byrow = TRUE)) +
+    theme(legend.position = "bottom")
 
   list(nmds_plot = nmds_plot, nmds_species_plot = nmds_species_plot)
 }
