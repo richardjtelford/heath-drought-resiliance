@@ -1,0 +1,314 @@
+---
+title: Recovery of coastal heathland after drought
+author: "Richard J. Telford"
+date: today
+format: pdf
+classoption: a4paper
+bibliography: Rmd/TDT2.bib
+csl: Rmd/elsevier-harvard_rjt.csl
+execute: 
+  error: true
+  echo: false
+knitr:
+  opts_chunk:
+    fig.path: methods-results-figures/
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(targets)
+library(tidyverse)
+library(vegan)
+library(patchwork)
+library(lmerTest)
+
+# force dependency on bibliography
+tar_read(biblio2)
+
+# set default theme
+theme_set(theme_bw()+ 
+            theme(panel.grid = element_blank()))
+```
+
+## Methods
+
+```{r}
+#| label: fig-map
+#| fig-cap: Site map
+theme_set(theme_bw())
+tar_read(map)
+theme_set(theme_bw() + 
+            theme(panel.grid = element_blank()))
+```
+
+
+
+```{r}
+#| label: tbl-sites
+#| tbl-cap: Sites
+tar_load(site_data)
+site_data |>
+  select(-Site) |>
+  relocate(code) |>
+  rename(Code = code) |>
+  gt::gt() |>
+  gt::fmt_number(c("Latitude", "Longitude"), decimals = 2)
+```
+
+### Statistical analysis
+
+Mixed effect models were used to regress the proportion dead _Calluna_ in 2016 against drought severity (estimated as January 2014 relative humidity) and local factors (soil depth and aspect),
+cover of regenerating _Calluna_ in burnt plots against time and latitude,
+seedling number in burnt plots against latitude,
+Except for seedling number which assumed a negative binomial distribution, all models assumed a Gaussian error distribution.
+
+Ordinations were performed on all taxa with more than two occurrences. 
+For detrended correspondence analysis / principal components analysis / correspondence analysis, taxon abundances were square root transformed.
+
+### Software
+
+All analyses were done in R v. `r getRversion()` [@R] and used
+vegan v. `r packageVersion("vegan")` [@vegan] for ordination,
+lme4 v. `r packageVersion("lme4")` [@lme4] and lmerTest v. `r packageVersion("lmerTest")` [@lmerTest] to fit mixed effect models
+and tidyverse v. `r packageVersion("tidyverse")` [@tidyverse] for data manipulation.
+Packages targets v. `r packageVersion("targets")` [@targets], 
+quarto `r packageVersion("quarto")` [@quarto] and
+renv v. `r packageVersion("renv")` [@renv] were used to ensure reproducibility.
+Code to reproduce all the analyses is archived at [https://github.com/richardjtelford/Lygra_traits/tree/Drake](https://github.com/richardjtelford/Lygra_traits/tree/Drake).
+
+## Results
+
+### decorana
+
+```{r}
+#| label: dca
+
+tar_load(pca_plots)
+pca_plots$DCA
+```
+
+First axis is long - suggests we should be using CA or nmds.
+
+If the burnt and unburnt plot are analysed separately, the length of the first DCA axis is 3.6 and 2.6 respectively.  
+
+
+### pca
+
+<!-- ```{r} -->
+<!-- #| label: fig-pca-plot -->
+<!-- #| fig-cap: PCA of square root transformed cover -->
+<!-- pca_plots$pca_plot -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: fig-pca-plot-b -->
+<!-- #| fig-cap: PCA of square root transformed cover v2 -->
+<!-- pca_plots$pca_plot_b -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #| label: fig-pca-plot-c -->
+<!-- #| fig-cap: PCA of square root transformed cover v3 -->
+<!-- pca_plots$pca_plot_c -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- #| label: fig-pca-sceeplot -->
+<!-- #| fig-cap: Screeplot. Broken stick not meaningful with these data - probably because -->
+<!-- #|   of the clustered data. -->
+<!-- screeplot(pca_plots$PCA) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: fig-species_PCA_plot -->
+<!-- #| fig-cap: Badly behaved species -->
+<!-- pca_plots$PCA_species_plot -->
+<!-- ``` -->
+
+I think the pca look so good because they are dominated by changes of total cover in vegetation after burning, and not compositional changes.
+As such the pca is just another way to present the cover bar charts.
+
+### ca
+
+<!-- ```{r} -->
+<!-- #| label: fig-ca-plot -->
+<!-- #| fig-cap: CA of square root transformed cover -->
+<!-- tar_load(ca_plots) -->
+<!-- ca_plots$ca_plot -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: fig-ca-plot-b -->
+<!-- #| fig-cap: CA of square root transformed cover v2 -->
+<!-- ca_plots$ca_plot_b -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #| label: fig-ca-plot-c -->
+<!-- #| fig-cap: CA of square root transformed cover v3 -->
+<!-- ca_plots$ca_plot_c -->
+<!-- ``` -->
+
+
+
+
+
+<!-- ```{r} -->
+<!-- #| label: fig-species_CA_plot -->
+<!-- #| fig-cap: Badly behaved species -->
+<!-- ca_plots$ca_species_plot -->
+<!-- ``` -->
+
+ca are mostly ignoring the changes in total cover, focusing on the relative abundance. 
+They look messy.
+
+### nmds
+
+```{r}
+#| label: fig-nmds-plot
+#| fig-cap: NMDS
+tar_load(nmds_plots)
+#nmds_plots$nmds_plot
+```
+
+```{r}
+#| label: fig-species_ordination_plot
+#| fig-cap: Too many species
+#| fig-height: !expr 20/2.54
+#| fig-width: !expr 15/2.54
+nmds_plots$nmds_plot / nmds_plots$nmds_species_plot +  plot_annotation(tag_levels = 'A')
+```
+
+NMDS also looks messy.
+
+### cover bar plots
+
+```{r}
+#| label: fig-calluna-cover-plot
+#| fig-cap: Changes of _Calluna_ cover over time by health status. Sites are arranged
+#|   from north-south.
+#|   Red-black line indicates the timing of the burning in the burnt plots.
+#| fig-height: !expr 13/2.54
+#| fig-width: !expr 13/2.54
+tar_read(calluna_cover_plot)
+```
+
+```{r}
+#| label: fig-community-group-plot
+#| fig-cap: Changes of community cover over time by taxonomic group. 
+#|   Sites are arranged from north-south.
+#|   Red-black line indicates the timing of the burning in the burnt plots.
+#| fig-height: !expr 20/2.54
+#| fig-width: !expr 15/2.54
+tar_read(community_group_cover_plot)
+```
+
+```{r}
+#| label: fig-seedling-plot
+#| fig-cap: Number of _Calluna_ seedlings over time in burnt plots.
+#| fig-width: !expr 80/25.4
+tar_read(seedling_plot)
+```
+
+## Proportion Dead
+
+
+```{r}
+#| label: fig-dead-aspect
+#| fig-cap: Proportion _Calluna_ dead, damaged or healthy aspect
+#| fig-height: 5
+tar_load(dead_damaged_plots)
+dead_damaged_plots$dead_north_plot
+```
+
+
+```{r}
+#| label: fig-dead-depth
+#| fig-cap: Proportion _Calluna_ dead, damaged or healthy  against mean peat depth
+#| fig-height: 5
+dead_damaged_plots$dead_depth_plot
+```
+
+
+```{r}
+#| label: fig-dead-slope
+#| fig-cap: Proportion _Calluna_ dead, damaged or healthy against slope
+#| fig-height: 5
+dead_damaged_plots$dead_slope_plot
+```
+
+
+
+## Weather plot
+
+```{r}
+#| label: fig-weather-plot
+#| fig-cap: Air temperature and relative humidity for January and February 2014
+tar_read(weather_plot)
+```
+
+## Climate plot
+
+```{r}
+#| label: fig-climate-plot
+#| fig-cap: Mean precipitation, temperature and relative humidity for January at the
+#|   nearest weather station to each field site. The black arrow indicates the 2014 condtions.
+#|   2014 precipitation data are missing for site _F_.
+#| fig-height: 4.5
+tar_read(climate_plot)
+```
+
+## Models
+
+### Seedling burnt vs unburnt
+
+```{r}
+tar_load(seedling_model)
+seedling_model$treatment |> summary()
+seedling_model$treatment |> anova()
+
+broom.mixed::augment(seedling_model$treatment, newdata = tibble(treatment = c("Burnt", "Unburnt")), re.form = NA) |> 
+  mutate(mean = exp(.fitted)) |> 
+  select(treatment, mean)
+```
+
+### Seedling abundance against latitude. 
+
+Mixed effect model with negative binomial distribution, random effect is plot nested in site.
+
+```{r}
+seedling_model$latitude |> summary()
+seedling_model$latitude |> anova()
+
+```
+
+### Calluna recovery in unburnt plots
+
+```{r}
+#| echo: true
+# Latitude as a proxy for drought severity
+tar_load(calluna_recovery_model)
+
+calluna_recovery_model$mod_unburnt_recovery |> 
+  summary()
+
+calluna_recovery_model$mod_unburnt_recovery |> 
+  anova()
+
+```
+
+### Recovery of Calluna in burnt plots
+
+```{r}
+#| echo: true
+
+calluna_recovery_model$mod_burnt_recovery |> 
+  summary()
+
+calluna_recovery_model$mod_burnt_recovery |> 
+  anova()
+```
+
+
+## References

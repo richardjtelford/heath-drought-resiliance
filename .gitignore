@@ -41,3 +41,24 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 .Rproj.user
+
+# targets cache
+_targets/
+
+#data
+data/
+Data/
+
+#figures & output
+*.png
+*.html
+*.pdf
+*.jpeg
+*.md
+*2.bib
+
+# renv library
+renv/library/
+
+# Mac
+*.DS_Store
